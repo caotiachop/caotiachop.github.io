@@ -25,7 +25,12 @@ jobs:
           cache: npm
 
       - run: npm ci
+
       - run: npm run build
+        env:
+          VITE_API_ENDPOINT: ${{ secrets.VITE_API_ENDPOINT }}
+          VITE_JSON_SERVER_STORE: ${{ secrets.VITE_JSON_SERVER_STORE }}
+          VITE_JSON_SERVER_KEY: ${{ secrets.VITE_JSON_SERVER_KEY }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
