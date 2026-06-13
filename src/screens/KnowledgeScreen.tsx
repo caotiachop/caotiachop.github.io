@@ -76,7 +76,7 @@ export function KnowledgeScreen() {
     setFoxEmotion('thinking');
     setAnswerStatus('idle');
     setSelectedKey('');
-    const answers = Object.entries(s.questions[ids[0]]?.answers ?? {});
+    const answers = Object.entries(s.questions[ids[0]]?.answers ?? {}).filter(([, v]) => v.trim());
     setShuffledAnswers(shuffle(answers));
     setSelectedSetId(setId);
     setPhase('playing');
@@ -107,7 +107,7 @@ export function KnowledgeScreen() {
     setFoxEmotion('thinking');
     setAnswerStatus('idle');
     setSelectedKey('');
-    setShuffledAnswers(shuffle(Object.entries(q.answers)));
+    setShuffledAnswers(shuffle(Object.entries(q.answers).filter(([, v]) => v.trim())));
     stopTimer();
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -157,7 +157,7 @@ export function KnowledgeScreen() {
         setSelectedKey('');
         setFoxEmotion('thinking');
         const q2 = getQuestion(selectedSetId, questionIds[currentIdx]);
-        if (q2) setShuffledAnswers(shuffle(Object.entries(q2.answers)));
+        if (q2) setShuffledAnswers(shuffle(Object.entries(q2.answers).filter(([, v]) => v.trim())));
       }, 700);
     }
   };

@@ -86,8 +86,7 @@ export function LoginScreen() {
     setPin(val);
     setError("");
     if (val.length === 4) {
-      setConfirmPin("");
-      setStep("confirm");
+      setTimeout(() => { setConfirmPin(""); setStep("confirm"); }, 180);
     }
   };
 
@@ -97,10 +96,9 @@ export function LoginScreen() {
     setError("");
     if (val.length !== 4) return;
     if (val === pin) {
-      setStep("grade");
+      setTimeout(() => setStep("grade"), 180);
     } else {
-      setConfirmPin("");
-      triggerShake("PIN không khớp, nhập lại nhé!");
+      setTimeout(() => { setConfirmPin(""); triggerShake("PIN không khớp, nhập lại nhé!"); }, 180);
     }
   };
 

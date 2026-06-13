@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
@@ -5,7 +6,9 @@ import { PageWrapper } from '../components/PageWrapper';
 import { AppleCount } from '../components/AppleCount';
 import { SettingsButton } from '../components/Settings';
 import { useApp } from '../lib/store';
+import { api } from '../lib/api';
 import { audio } from '../lib/audio';
+import type { MenuItemConfig } from '../types';
 
 const STUDENT_ITEMS = [
   { label: 'Cáo Tia Chớp', sub: 'Toán tốc độ', img: '/assets/fox-job/fast-speed.webp', route: '/speed' },
@@ -21,10 +24,23 @@ const TEACHER_ITEMS = [
 export function MenuScreen() {
   const navigate = useNavigate();
   const { currentUser, user } = useApp();
+  const [menuConfig, setMenuConfig] = useState<Record<string, MenuItemConfig>>({});
+
+  useEffect(() => {
+    api.getData().then(d => setMenuConfig(d.menuConfig ?? {})).catch(() => {});
+  }, []);
 
   if (!currentUser) { navigate('/', { replace: true }); return null; }
 
-  const MENU_ITEMS = user?.role === 'teacher' ? TEACHER_ITEMS : STUDENT_ITEMS;
+  const MENU_ITEMS = user?.role === 'teacher' ? TEACHER_ITEMS : STUDENT_ITEMS.map(item => {
+    const key = item.route.replace('/', '');
+    const cfg = menuConfig[key];
+    return {
+      ...item,
+      label: cfg?.label?.trim() || item.label,
+      sub: cfg?.sub?.trim() || item.sub,
+    };
+  });
 
   return (
     <PageWrapper>

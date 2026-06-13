@@ -1,0 +1,225 @@
+{
+  "users": {
+    "GiaoVien": {
+      "pin": "1234",
+      "grade": 5,
+      "role": "teacher",
+      "apples": 999,
+      "currentOutfit": "default",
+      "purchasedOutfits": { "default": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    },
+    "AnhTuan": {
+      "pin": "1111",
+      "grade": 3,
+      "role": "student",
+      "apples": 50,
+      "currentOutfit": "default",
+      "purchasedOutfits": { "default": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2026-01-10T00:00:00.000Z"
+    },
+    "MinhNgoc": {
+      "pin": "2222",
+      "grade": 2,
+      "role": "student",
+      "apples": 30,
+      "currentOutfit": "default",
+      "purchasedOutfits": { "default": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2026-01-15T00:00:00.000Z"
+    },
+    "ThuyLinh": {
+      "pin": "3333",
+      "grade": 4,
+      "role": "student",
+      "apples": 80,
+      "currentOutfit": "short",
+      "purchasedOutfits": { "default": true, "short": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2026-01-20T00:00:00.000Z"
+    }
+  },
+  "scores": {
+    "AnhTuan": {
+      "maxApples": 50,
+      "speedGame": { "maxLevel": 5, "bestTimeMs": 1200 },
+      "fashionCompletedAt": null
+    },
+    "MinhNgoc": {
+      "maxApples": 30,
+      "speedGame": { "maxLevel": 3, "bestTimeMs": 2100 },
+      "fashionCompletedAt": null
+    },
+    "ThuyLinh": {
+      "maxApples": 80,
+      "speedGame": { "maxLevel": 7, "bestTimeMs": 980 },
+      "fashionCompletedAt": null
+    }
+  },
+  "knowledgeSets": {
+    "set_lop1_cong": {
+      "grade": 1,
+      "topic": "Phép cộng trong phạm vi 10",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "3 + 4 = ?",
+          "answers": { "a": "6", "b": "7", "c": "8", "d": "5" },
+          "correctKey": "b",
+          "difficulty": "easy"
+        },
+        "q2": {
+          "question": "5 + 3 = ?",
+          "answers": { "a": "7", "b": "9", "c": "8", "d": "6" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        },
+        "q3": {
+          "question": "2 + 7 = ?",
+          "answers": { "a": "8", "b": "10", "c": "9", "d": "11" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        },
+        "q4": {
+          "question": "6 + 4 = ?",
+          "answers": { "a": "9", "b": "11", "c": "10", "d": "8" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        }
+      }
+    },
+    "set_lop1_tru": {
+      "grade": 1,
+      "topic": "Phép trừ trong phạm vi 10",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "9 - 4 = ?",
+          "answers": { "a": "4", "b": "6", "c": "5", "d": "3" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        },
+        "q2": {
+          "question": "8 - 3 = ?",
+          "answers": { "a": "5", "b": "6", "c": "4", "d": "7" },
+          "correctKey": "a",
+          "difficulty": "easy"
+        },
+        "q3": {
+          "question": "10 - 7 = ?",
+          "answers": { "a": "4", "b": "2", "c": "3", "d": "5" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        }
+      }
+    },
+    "set_lop2_nhan": {
+      "grade": 2,
+      "topic": "Bảng nhân 2, 3, 4, 5",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "3 × 4 = ?",
+          "answers": { "a": "7", "b": "14", "c": "12", "d": "10" },
+          "correctKey": "c",
+          "difficulty": "medium"
+        },
+        "q2": {
+          "question": "5 × 5 = ?",
+          "answers": { "a": "20", "b": "30", "c": "10", "d": "25" },
+          "correctKey": "d",
+          "difficulty": "medium"
+        },
+        "q3": {
+          "question": "2 × 8 = ?",
+          "answers": { "a": "14", "b": "16", "c": "18", "d": "10" },
+          "correctKey": "b",
+          "difficulty": "medium"
+        },
+        "q4": {
+          "question": "4 × 6 = ?",
+          "answers": { "a": "20", "b": "26", "c": "24", "d": "22" },
+          "correctKey": "c",
+          "difficulty": "medium"
+        }
+      }
+    },
+    "set_lop3_chia": {
+      "grade": 3,
+      "topic": "Chia hết và chia có dư",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "17 ÷ 3 = ? dư ?",
+          "answers": { "a": "5 dư 2", "b": "4 dư 5", "c": "6 dư 0", "d": "5 dư 1" },
+          "correctKey": "a",
+          "difficulty": "hard"
+        },
+        "q2": {
+          "question": "25 ÷ 4 = ? dư ?",
+          "answers": { "a": "5 dư 5", "b": "6 dư 1", "c": "7 dư 0", "d": "5 dư 0" },
+          "correctKey": "b",
+          "difficulty": "hard"
+        },
+        "q3": {
+          "question": "32 ÷ 5 = ? dư ?",
+          "answers": { "a": "6 dư 2", "b": "7 dư 2", "c": "6 dư 1", "d": "7 dư 3" },
+          "correctKey": "a",
+          "difficulty": "hard"
+        }
+      }
+    },
+    "set_lop4_phanso": {
+      "grade": 4,
+      "topic": "Phân số cơ bản",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "1/2 + 1/4 = ?",
+          "answers": { "a": "2/6", "b": "3/4", "c": "2/4", "d": "1/3" },
+          "correctKey": "b",
+          "difficulty": "hard"
+        },
+        "q2": {
+          "question": "3/4 - 1/4 = ?",
+          "answers": { "a": "2/8", "b": "1/2", "c": "2/4", "d": "3/8" },
+          "correctKey": "c",
+          "difficulty": "medium"
+        }
+      }
+    },
+    "set_lop5_dientich": {
+      "grade": 5,
+      "topic": "Diện tích hình chữ nhật",
+      "createdBy": "GiaoVien",
+      "questions": {
+        "q1": {
+          "question": "Hình chữ nhật dài 8cm, rộng 5cm. Diện tích là?",
+          "answers": { "a": "13 cm²", "b": "40 cm²", "c": "26 cm²", "d": "35 cm²" },
+          "correctKey": "b",
+          "difficulty": "medium"
+        },
+        "q2": {
+          "question": "Hình vuông cạnh 6cm. Diện tích là?",
+          "answers": { "a": "24 cm²", "b": "12 cm²", "c": "36 cm²", "d": "30 cm²" },
+          "correctKey": "c",
+          "difficulty": "easy"
+        },
+        "q3": {
+          "question": "Hình chữ nhật có diện tích 48cm², chiều dài 8cm. Chiều rộng là?",
+          "answers": { "a": "5 cm", "b": "7 cm", "c": "6 cm", "d": "4 cm" },
+          "correctKey": "c",
+          "difficulty": "hard"
+        }
+      }
+    }
+  },
+  "userProgress": {
+    "AnhTuan": { "completedSetIds": { "set_lop1_cong": true } },
+    "MinhNgoc": { "completedSetIds": {} },
+    "ThuyLinh": { "completedSetIds": { "set_lop1_cong": true, "set_lop1_tru": true } }
+  },
+  "menuConfig": {}
+}

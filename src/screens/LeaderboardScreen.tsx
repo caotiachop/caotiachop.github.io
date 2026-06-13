@@ -25,7 +25,7 @@ export function LeaderboardScreen() {
     api.getData().then(d => {
       setData(
         Object.entries(d.users ?? {})
-          .filter(([name]) => Boolean(d.scores?.[name]))
+          .filter(([name, u]) => Boolean(d.scores?.[name]) && u.role !== 'teacher')
           .map(([name, u]) => ({ name, user: u, score: d.scores![name] }))
       );
       setLoading(false);

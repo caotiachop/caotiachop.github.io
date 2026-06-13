@@ -33,11 +33,17 @@ export interface UserProgress {
   completedSetIds: Record<string, boolean>;
 }
 
+export interface MenuItemConfig {
+  label?: string;
+  sub?: string;
+}
+
 export interface AppData {
   users: Record<string, User>;
   scores: Record<string, Score>;
   knowledgeSets: Record<string, KnowledgeSet>;
   userProgress: Record<string, UserProgress>;
+  menuConfig?: Record<string, MenuItemConfig>;
 }
 
 export type FoxEmotion = 'normal' | 'happy' | 'thinking' | 'angry' | 'sad';
