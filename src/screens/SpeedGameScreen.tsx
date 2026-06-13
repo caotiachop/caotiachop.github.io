@@ -436,7 +436,7 @@ export function SpeedGameScreen() {
                     color: "#3E2000",
                   }}
                 >
-                  +1 <img src="/assets/apple.png" width={22} alt="táo" />
+                  +1 <img src="/assets/apple.webp" width={22} alt="táo" />
                 </div>
               </motion.div>
             </>
@@ -579,7 +579,7 @@ export function SpeedGameScreen() {
               >
                 <Play size={18} /> Chơi tiếp ({level * 2}{" "}
                 <img
-                  src="/assets/apple.png"
+                  src="/assets/apple.webp"
                   width={20}
                   alt="táo"
                   style={{ verticalAlign: "middle", marginLeft: -8, marginRight: -10, marginBottom: 5, zoom: 1.2 }}

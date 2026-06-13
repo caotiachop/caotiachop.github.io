@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AppProvider } from './lib/store';
@@ -7,27 +7,30 @@ import { audio } from './lib/audio';
 import { HomeScreen } from './screens/HomeScreen';
 import { LoginScreen } from './screens/LoginScreen';
 import { MenuScreen } from './screens/MenuScreen';
-import { SpeedGameScreen } from './screens/SpeedGameScreen';
-import { KnowledgeScreen } from './screens/KnowledgeScreen';
-import { FashionScreen } from './screens/FashionScreen';
-import { LeaderboardScreen } from './screens/LeaderboardScreen';
-import { TeacherScreen } from './screens/TeacherScreen';
+
+const SpeedGameScreen  = lazy(() => import('./screens/SpeedGameScreen').then(m => ({ default: m.SpeedGameScreen })));
+const KnowledgeScreen  = lazy(() => import('./screens/KnowledgeScreen').then(m => ({ default: m.KnowledgeScreen })));
+const FashionScreen    = lazy(() => import('./screens/FashionScreen').then(m => ({ default: m.FashionScreen })));
+const LeaderboardScreen = lazy(() => import('./screens/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
+const TeacherScreen    = lazy(() => import('./screens/TeacherScreen').then(m => ({ default: m.TeacherScreen })));
 
 function AnimatedRoutes() {
   const location = useLocation();
   return (
     <div className="app-shell">
       <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/menu" element={<MenuScreen />} />
-          <Route path="/speed" element={<SpeedGameScreen />} />
-          <Route path="/knowledge" element={<KnowledgeScreen />} />
-          <Route path="/fashion" element={<FashionScreen />} />
-          <Route path="/leaderboard" element={<LeaderboardScreen />} />
-          <Route path="/teacher" element={<TeacherScreen />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/menu" element={<MenuScreen />} />
+            <Route path="/speed" element={<SpeedGameScreen />} />
+            <Route path="/knowledge" element={<KnowledgeScreen />} />
+            <Route path="/fashion" element={<FashionScreen />} />
+            <Route path="/leaderboard" element={<LeaderboardScreen />} />
+            <Route path="/teacher" element={<TeacherScreen />} />
+          </Routes>
+        </Suspense>
       </AnimatePresence>
     </div>
   );

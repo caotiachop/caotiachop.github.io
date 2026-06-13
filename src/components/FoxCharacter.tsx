@@ -33,7 +33,7 @@ export function FoxCharacter({ outfit = 'default', emotion = 'normal', width = 1
       ...style,
     }}>
       <img
-        src={`/assets/fox-charater/${outfit}.png`}
+        src={`/assets/fox-charater/${outfit}.webp`}
         alt=""
         draggable={false}
         style={{

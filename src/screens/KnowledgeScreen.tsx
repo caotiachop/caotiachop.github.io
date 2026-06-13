@@ -427,7 +427,7 @@ export function KnowledgeScreen() {
                             >
                               +{qCount * 2}{" "}
                               <img
-                                src="/assets/apple.png"
+                                src="/assets/apple.webp"
                                 width={14}
                                 alt="táo"
                               />
@@ -578,7 +578,7 @@ export function KnowledgeScreen() {
                 >
                   +{earnedApples}{" "}
                   <img
-                    src="/assets/apple.png"
+                    src="/assets/apple.webp"
                     width={22}
                     alt="táo"
                     style={{ verticalAlign: "middle" }}
@@ -591,7 +591,7 @@ export function KnowledgeScreen() {
                 </div>
               )}
               <img
-                src="/assets/win.png"
+                src="/assets/win.webp"
                 alt="win"
                 style={{ width: 140, objectFit: "contain" }}
               />

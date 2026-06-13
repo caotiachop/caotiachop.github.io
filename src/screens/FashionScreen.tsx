@@ -358,7 +358,7 @@ export function FashionScreen() {
             </div>
             {outfit.price > 0 && !owned && (
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <img src="/assets/apple.png" width={22} alt="táo" />
+                <img src="/assets/apple.webp" width={22} alt="táo" />
                 <span
                   style={{
                     fontSize: 20,

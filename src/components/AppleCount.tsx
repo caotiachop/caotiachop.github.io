@@ -35,7 +35,7 @@ export function AppleCount({ count, size = 'md' }: Props) {
       padding: cfg.pad,
       boxShadow: '0 3px 0 #F5A800',
     }}>
-      <img src="/assets/apple.png" width={cfg.img} height={cfg.img} alt="táo"
+      <img src="/assets/apple.webp" width={cfg.img} height={cfg.img} alt="táo"
         style={{ objectFit: 'contain', flexShrink: 0 }} />
       <AnimatePresence mode="popLayout">
         <motion.span
