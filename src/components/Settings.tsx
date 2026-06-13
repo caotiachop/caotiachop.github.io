@@ -3,9 +3,10 @@ import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Settings, Music, Volume2, X, LogOut, TriangleAlert } from 'lucide-react';
+import { Settings, Music, Volume2, X, LogOut, TriangleAlert, Key, ShieldCheck, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useApp } from '../lib/store';
 import { audio } from '../lib/audio';
+import { VirtualKeypad } from './VirtualKeypad';
 
 interface SettingsCtxType { open: () => void }
 const SettingsCtx = createContext<SettingsCtxType | null>(null);
@@ -47,39 +48,107 @@ export function SettingsButton() {
   );
 }
 
+type SettingsPanel = 'main' | 'logout' | 'pin-verify' | 'pin-new' | 'pin-confirm' | 'pin-done';
+
 function SettingsOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const navigate = useNavigate();
-  const { currentUser, user, updateSettings, logout } = useApp();
-  const [confirmLogout, setConfirmLogout] = useState(false);
+  const { currentUser, updateSettings, logout, updatePin } = useApp();
+  const [panel, setPanel] = useState<SettingsPanel>('main');
   const [musicVol, setMusicVol] = useState(() => audio.getMusicVolume());
   const [soundVol, setSoundVol] = useState(() => audio.getSoundVolume());
 
-  // Reset confirm state whenever dialog closes
+  // PIN change state
+  const [currentPin, setCurrentPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmNewPin, setConfirmNewPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinShake, setPinShake] = useState(false);
+  const [pinLoading, setPinLoading] = useState(false);
+
+  const triggerPinShake = (msg: string) => {
+    setPinShake(true);
+    setTimeout(() => setPinShake(false), 400);
+    setPinError(msg);
+  };
+
+  // Reset all pin state
+  const resetPin = () => {
+    setCurrentPin(''); setNewPin(''); setConfirmNewPin('');
+    setPinError(''); setPinShake(false); setPinLoading(false);
+  };
+
+  // Reset whenever dialog closes
   useEffect(() => {
-    if (!isOpen) setConfirmLogout(false);
+    if (!isOpen) { setPanel('main'); resetPin(); }
   }, [isOpen]);
 
   const handleMusic = (v: number) => {
     setMusicVol(v);
     audio.setMusicVolume(v);
-    if (user) updateSettings({ music: v > 0 });
+    updateSettings({ music: v > 0 });
   };
 
   const handleSound = (v: number) => {
     setSoundVol(v);
     audio.setSoundVolume(v);
-    if (user) updateSettings({ sound: v > 0 });
+    updateSettings({ sound: v > 0 });
   };
 
   const handleLogout = () => {
     audio.play('button-back');
     logout();
-    setConfirmLogout(false);
+    setPanel('main');
     onClose();
     navigate('/');
   };
 
-  const handleClose = () => { setConfirmLogout(false); onClose(); };
+  const handleClose = () => { setPanel('main'); resetPin(); onClose(); };
+
+  // ── PIN change handlers ───────────────────────────────────────────────────
+  const handleVerifyPin = async (val: string) => {
+    setCurrentPin(val);
+    setPinError('');
+    if (val.length !== 4) return;
+    setPinLoading(true);
+    const result = await updatePin(val, val); // validate only – pass same pin to check
+    setPinLoading(false);
+    // We only use updatePin for verification here; actual change happens at pin-confirm
+    // Instead, call getData to verify: reuse updatePin logic via a verify-only approach.
+    // Since updatePin(current, current) would set pin to same value if correct:
+    if (result === 'ok') {
+      setTimeout(() => { setNewPin(''); setPanel('pin-new'); }, 180);
+    } else {
+      setCurrentPin('');
+      triggerPinShake('PIN hiện tại không đúng!');
+    }
+  };
+
+  const handleNewPin = (val: string) => {
+    setNewPin(val);
+    setPinError('');
+    if (val.length === 4) setTimeout(() => { setConfirmNewPin(''); setPanel('pin-confirm'); }, 180);
+  };
+
+  const handleConfirmNewPin = async (val: string) => {
+    setConfirmNewPin(val);
+    setPinError('');
+    if (val.length !== 4) return;
+    if (val !== newPin) {
+      setTimeout(() => { setConfirmNewPin(''); triggerPinShake('PIN không khớp, nhập lại!'); }, 180);
+      return;
+    }
+    setPinLoading(true);
+    const result = await updatePin(currentPin, newPin);
+    setPinLoading(false);
+    if (result === 'ok') {
+      audio.play('success');
+      setPanel('pin-done');
+    } else {
+      resetPin();
+      setPanel('pin-verify');
+      triggerPinShake('Lỗi xác thực, thử lại!');
+    }
+  };
 
   return (
     <AnimatePresence>

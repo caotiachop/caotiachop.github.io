@@ -15,6 +15,7 @@ interface AppContextType {
   registerUser: (name: string, pin: string, grade: number) => Promise<void>;
   logout: () => void;
   updateSettings: (s: Partial<User['settings']>) => Promise<void>;
+  updatePin: (currentPin: string, newPin: string) => Promise<'ok' | 'wrong_pin'>;
   addApples: (amount: number) => Promise<void>;
   updateOutfit: (outfit: string) => Promise<void>;
   purchaseOutfit: (outfit: string, price: number) => Promise<boolean>;
@@ -106,6 +107,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     audio.pauseMusic();
   };
 
+  const updatePin = async (currentPin: string, newPin: string): Promise<'ok' | 'wrong_pin'> => {
+    if (!currentUser || !user) return 'wrong_pin';
+    const data = await api.getData();
+    const stored = data.users?.[currentUser];
+    if (!stored || stored.pin !== currentPin) return 'wrong_pin';
+    setUser({ ...user, pin: newPin });
+    await api.put({ users: { [currentUser]: { pin: newPin } } });
+    return 'ok';
+  };
+
   const updateSettings = async (s: Partial<User['settings']>) => {
     if (!currentUser || !user) return;
     const next = { ...user.settings, ...s };
@@ -184,7 +195,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     <AppContext.Provider value={{
       currentUser, user, score, userProgress, loading,
       checkUser, loginUser, registerUser, logout,
-      updateSettings, addApples, updateOutfit, purchaseOutfit,
+      updateSettings, updatePin, addApples, updateOutfit, purchaseOutfit,
       updateSpeedScore, completeKnowledgeSet, refreshUser,
     }}>
       {children}
