@@ -13,10 +13,11 @@ interface Props {
   letter: string;
   text: string;
   status?: 'idle' | 'correct' | 'wrong' | 'disabled';
+  isSpeaking?: boolean;
   onClick?: () => void;
 }
 
-export function AnswerButton({ letter, text, status = 'idle', onClick }: Props) {
+export function AnswerButton({ letter, text, status = 'idle', isSpeaking = false, onClick }: Props) {
   const col = LETTER_COLORS[letter] ?? LETTER_COLORS['A'];
   const isDisabled = status === 'disabled';
 
@@ -30,6 +31,10 @@ export function AnswerButton({ letter, text, status = 'idle', onClick }: Props) 
     status === 'correct' ? '0 4px 0 #4CAF50' :
     status === 'wrong' ? '0 4px 0 #FF5722' : '0 4px 0 #F5A800';
 
+  const speakShadow = isSpeaking && status === 'idle'
+    ? `0 0 0 3px #2196F3, ${cardShadow}`
+    : cardShadow;
+
   return (
     <motion.button
       onPointerDown={!isDisabled ? onClick : undefined}
@@ -42,14 +47,15 @@ export function AnswerButton({ letter, text, status = 'idle', onClick }: Props) 
         gap: 12,
         width: '100%',
         background: cardBg,
-        border: `3px solid ${cardBorder}`,
-        boxShadow: cardShadow,
+        border: `3px solid ${isSpeaking && status === 'idle' ? '#2196F3' : cardBorder}`,
+        boxShadow: speakShadow,
         borderRadius: 16,
         padding: '12px 14px',
         cursor: isDisabled ? 'default' : 'pointer',
         opacity: isDisabled ? 0.5 : 1,
         fontFamily: "'Baloo 2', cursive",
         textAlign: 'left',
+        transition: 'border-color 0.15s, box-shadow 0.15s',
       }}
     >
       <div style={{

@@ -10,12 +10,14 @@ import {
   ShoppingBag,
   Gift,
   Sparkles,
+  Star,
 } from "lucide-react";
 import { SettingsButton } from "../components/Settings";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageWrapper } from "../components/PageWrapper";
 import { FoxCharacter } from "../components/FoxCharacter";
 import { AppleCount } from "../components/AppleCount";
+import { Confetti } from "../components/Confetti";
 import { useApp } from "../lib/store";
 import { audio } from "../lib/audio";
 
@@ -180,6 +182,12 @@ export function FashionScreen() {
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
+            background: owned
+              ? wearing
+                ? "radial-gradient(ellipse at center, rgba(76,175,80,0.18) 0%, transparent 70%)"
+                : "radial-gradient(ellipse at center, rgba(255,214,0,0.22) 0%, transparent 70%)"
+              : undefined,
+            transition: "background 0.4s",
           }}
         >
           <motion.button
@@ -213,6 +221,7 @@ export function FashionScreen() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                position: "relative",
               }}
               onTouchStart={()=>setIsTouch(true)}
               onMouseDown={() => setIsTouch(true)}
@@ -224,6 +233,39 @@ export function FashionScreen() {
                 emotion={isTouch ? "happy" : "normal"}
                 width={180}
               />
+
+              {/* Badge đã mua / đang mặc */}
+              {owned && (
+                <motion.div
+                  initial={{ scale: 0, rotate: -15 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 18, delay: 0.15 }}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: -8,
+                    background: wearing ? "#4CAF50" : "#FFD600",
+                    border: `3px solid ${wearing ? "#2E7D32" : "#F5A800"}`,
+                    boxShadow: `0 3px 0 ${wearing ? "#1B5E20" : "#C17F00"}`,
+                    borderRadius: 20,
+                    padding: "5px 10px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: wearing ? "#fff" : "#3E2000",
+                    fontFamily: "'Baloo 2', cursive",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {wearing ? (
+                    <><Check size={13} /> Đang mặc</>
+                  ) : (
+                    <><Sparkles size={13} /> Đã mua</>
+                  )}
+                </motion.div>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -252,13 +294,18 @@ export function FashionScreen() {
         <motion.div
           layout
           style={{
-            background: "rgba(255,251,234,0.96)",
-            borderTop: "3px solid #FFD600",
+            background: owned
+              ? wearing
+                ? "rgba(232,245,233,0.98)"
+                : "rgba(255,251,234,0.98)"
+              : "rgba(255,251,234,0.96)",
+            borderTop: `3px solid ${owned ? (wearing ? "#4CAF50" : "#FFD600") : "#FFD600"}`,
             borderRadius: "24px 24px 0 0",
             padding: "20px 20px 32px",
             display: "flex",
             flexDirection: "column",
             gap: 14,
+            transition: "background 0.3s, border-color 0.3s",
           }}
         >
           <div
@@ -272,19 +319,31 @@ export function FashionScreen() {
               <div style={{ fontSize: 22, fontWeight: 800, color: "#3E2000" }}>
                 {outfit.name}
               </div>
-              <div style={{ fontSize: 13, color: "#7D5A2C" }}>
+              <div style={{ fontSize: 13, color: "#7D5A2C", marginTop: 4 }}>
                 {owned ? (
                   wearing ? (
-                    <span
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}
+                    <motion.span
+                      animate={{ scale: [1, 1.06, 1] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        background: "#E8F5E9", border: "2px solid #4CAF50",
+                        borderRadius: 20, padding: "3px 10px",
+                        fontWeight: 700, color: "#2E7D32", fontSize: 13,
+                      }}
                     >
-                      <Check size={14} color="#4CAF50" /> Đang mặc
-                    </span>
+                      <Check size={13} color="#4CAF50" /> Đang mặc
+                    </motion.span>
                   ) : (
                     <span
-                      style={{ display: "flex", alignItems: "center", gap: 4 }}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        background: "rgba(255,214,0,0.25)", border: "2px solid #F5A800",
+                        borderRadius: 20, padding: "3px 10px",
+                        fontWeight: 700, color: "#7D5A2C", fontSize: 13,
+                      }}
                     >
-                      <Check size={14} /> Đã mua
+                      <Sparkles size={13} color="#F5A800" /> Đã mua
                     </span>
                   )
                 ) : (
@@ -404,30 +463,86 @@ export function FashionScreen() {
         {/* Buy success overlay */}
         <AnimatePresence>
           {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(76,175,80,0.2)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backdropFilter: "blur(4px)",
-              }}
-            >
+            <>
+              <Confetti count={55} />
               <motion.div
-                initial={{ scale: 0.5, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 1.2, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300 }}
-                style={{ fontSize: 80, textAlign: "center" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "rgba(62,32,0,0.45)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backdropFilter: "blur(6px)",
+                  zIndex: 10,
+                }}
               >
-                <Sparkles size={80} color="#AB47BC" />
+                <motion.div
+                  initial={{ scale: 0.6, y: 40, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.8, y: -20, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                  style={{
+                    background: "#FFFBEA",
+                    border: "4px solid #FFD600",
+                    borderRadius: 28,
+                    boxShadow: "0 8px 0 #C17F00",
+                    padding: "32px 40px 28px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 12,
+                    minWidth: 240,
+                  }}
+                >
+                  {/* Star icon with bounce */}
+                  <motion.div
+                    animate={{ rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.25, 1] }}
+                    transition={{ duration: 0.7, delay: 0.1 }}
+                  >
+                    <Star size={64} fill="#FFD600" color="#F5A800" />
+                  </motion.div>
+
+                  <div style={{ fontSize: 26, fontWeight: 800, color: "#3E2000", textAlign: "center" }}>
+                    Mua thành công!
+                  </div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    style={{
+                      background: "#FFD600",
+                      border: "3px solid #F5A800",
+                      borderRadius: 16,
+                      padding: "8px 20px",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      color: "#3E2000",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      boxShadow: "0 4px 0 #C17F00",
+                    }}
+                  >
+                    <Sparkles size={16} color="#F5A800" />
+                    {outfit.name}
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    style={{ fontSize: 13, color: "#7D5A2C", fontWeight: 600 }}
+                  >
+                    <Check size={13} style={{ verticalAlign: "middle" }} /> Đã thêm vào tủ đồ của bạn
+                  </motion.div>
+                </motion.div>
               </motion.div>
-            </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>

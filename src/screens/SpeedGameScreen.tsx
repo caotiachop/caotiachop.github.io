@@ -580,9 +580,9 @@ export function SpeedGameScreen() {
                 <Play size={18} /> Chơi tiếp ({level * 2}{" "}
                 <img
                   src="/assets/apple.png"
-                  width={16}
+                  width={20}
                   alt="táo"
-                  style={{ verticalAlign: "middle" }}
+                  style={{ verticalAlign: "middle", marginLeft: -8, marginRight: -10, marginBottom: 5, zoom: 1.2 }}
                 />
                 )
               </ModalBtn>
