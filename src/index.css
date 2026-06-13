@@ -1,0 +1,131 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  font-family: 'Baloo 2', cursive;
+  --bg: #FFFBEA;
+  --primary: #FFD600;
+  --primary-dark: #F5A800;
+  --text: #3E2000;
+  --text-muted: #7D5A2C;
+  --card-bg: #FFFFFF;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: url("/assets/background.webp");
+  background-position: center;
+  background-size: cover;
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 100dvh;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* Tablet: scale up base sizes */
+@media (min-width: 600px) {
+  :root {
+    font-size: 18px;
+  }
+}
+
+button {
+  font-family: 'Baloo 2', cursive;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input {
+  font-family: 'Baloo 2', cursive;
+  outline: none;
+}
+
+/* Volume slider */
+.vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #FFD600 var(--pct, 50%), #E0E0E0 var(--pct, 50%));
+  outline: none;
+  cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: #FFD600;
+  border: 3px solid #F5A800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+.vol-slider::-moz-range-thumb {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: #FFD600;
+  border: 3px solid #F5A800;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  cursor: pointer;
+}
+
+/* Scrollbar style */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #F5A800; border-radius: 4px; }
+
+/* Fox speech bubble (tail points left toward the fox) */
+.fox-bubble {
+  background: #FFFFFF;
+  border: 3px solid #FFD600;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #F5A800;
+  position: relative;
+}
+.fox-bubble::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 10px 14px 10px 0;
+  border-style: solid;
+  border-color: transparent #FFD600 transparent transparent;
+}
+.fox-bubble::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 8px 11px 8px 0;
+  border-style: solid;
+  border-color: transparent #FFFFFF transparent transparent;
+}
