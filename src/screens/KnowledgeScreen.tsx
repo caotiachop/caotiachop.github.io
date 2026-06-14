@@ -363,7 +363,7 @@ export function KnowledgeScreen() {
                           initial={{ opacity: 0, x: -30 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.07 }}
-                          onPointerDown={() => {
+                          onClick={() => {
                             audio.play("button-click");
                             startSet(setId);
                           }}

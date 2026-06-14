@@ -12,11 +12,10 @@ import { useApp } from '../lib/store';
 import { auth } from '../lib/firebase';
 import { audio } from '../lib/audio';
 import { battleApi } from '../lib/battleApi';
-import { generateQuestion } from '../lib/gameLogic';
+import { generateQuestion, timeLimit } from '../lib/gameLogic';
 import type { Battle, FoxEmotion } from '../types';
 
 const REVEAL_MS = 2800;
-const QUESTION_COUNT = 10;
 
 type PrePhase = 'select' | 'join';
 
@@ -43,6 +42,8 @@ export function BattleScreen() {
   const [myAnswer, setMyAnswer] = useState<string | null>(null);
   const [foxEmotion, setFoxEmotion] = useState<FoxEmotion>('thinking');
   const hasAdvancedRef = useRef(false);
+  const earlyRevealRef = useRef(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const battleRef = useRef<Battle | null>(null);
 
   const [copied, setCopied] = useState(false);
@@ -60,14 +61,57 @@ export function BattleScreen() {
     if (urlCode) { setJoinInput(urlCode); setPrePhase('join'); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => { unsubRef.current?.(); }, []);
+  useEffect(() => () => {
+    unsubRef.current?.();
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+  }, []);
 
   useEffect(() => {
     hasAdvancedRef.current = false;
+    earlyRevealRef.current = false;
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
     setMyAnswer(null);
     setCurrentAnswer('');
     setFoxEmotion('thinking');
   }, [battle?.currentQuestionIdx]);
+
+  const playerCount = Object.keys(battle?.players ?? {}).length;
+  const answeredCount = Object.values(battle?.players ?? {}).filter(p => p.answerThisQ !== null).length;
+  const allAnswered = battle?.status === 'playing' && playerCount > 0 && answeredCount === playerCount;
+  const oneLeft = battle?.status === 'playing' && playerCount > 1 && answeredCount === playerCount - 1;
+
+  // Helper: host advances to next question
+  const doAdvance = () => {
+    const b = battleRef.current;
+    if (!b || hasAdvancedRef.current || !isHost) return;
+    hasAdvancedRef.current = true;
+    const nextIdx = b.currentQuestionIdx + 1;
+    const nextLevel = Math.floor(nextIdx / 3) + 1;
+    void battleApi.nextQuestion(roomCode, nextIdx, Object.keys(b.players), generateQuestion(nextLevel), timeLimit(nextLevel));
+  };
+
+  // Tất cả đã trả lời đúng → chuyển câu ngay, không reveal
+  useEffect(() => {
+    if (!allAnswered || hasAdvancedRef.current) return;
+    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
+    earlyRevealRef.current = true;
+    doAdvance();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allAnswered, isHost, roomCode]);
+
+  // Chỉ còn 1 người chưa trả lời → hiện reveal rồi chuyển câu sau REVEAL_MS
+  useEffect(() => {
+    if (!oneLeft || allAnswered || earlyRevealRef.current || hasAdvancedRef.current) return;
+    earlyRevealRef.current = true;
+    setGamePhase('reveal');
+    setTimeLeft(0);
+    if (!isHost || advanceTimerRef.current) return;
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
+      doAdvance();
+    }, REVEAL_MS);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [oneLeft, allAnswered, isHost, roomCode]);
 
   // Game timer — synced to questionStartedAt from Firestore
   useEffect(() => {
@@ -82,17 +126,19 @@ export function BattleScreen() {
       if (elapsed < 0) {
         setGamePhase('countdown');
         setCountdownNum(Math.ceil(Math.abs(elapsed) / 1000));
-      } else if (elapsed < totalMs) {
+      } else if (elapsed < totalMs && !earlyRevealRef.current) {
         setGamePhase('question');
         setTimeLeft(Math.ceil((totalMs - elapsed) / 1000));
-      } else {
+      } else if (!earlyRevealRef.current) {
+        // Hết giờ → hiện reveal rồi chuyển câu
         setGamePhase('reveal');
         setTimeLeft(0);
-        const b = battleRef.current;
-        if (isHost && !hasAdvancedRef.current && b && elapsed >= totalMs + REVEAL_MS) {
-          hasAdvancedRef.current = true;
-          const next = b.currentQuestionIdx + 1;
-          void battleApi.nextQuestion(roomCode, next, b.questions.length, Object.keys(b.players));
+        earlyRevealRef.current = true;
+        if (isHost && !advanceTimerRef.current) {
+          advanceTimerRef.current = setTimeout(() => {
+            advanceTimerRef.current = null;
+            doAdvance();
+          }, REVEAL_MS);
         }
       }
     };
@@ -112,11 +158,8 @@ export function BattleScreen() {
     if (!user || !uid || creating) return;
     setCreating(true);
     try {
-      // Sinh câu toán tăng dần độ khó: 2 câu mỗi level
-      const questions = Array.from({ length: QUESTION_COUNT }, (_, i) =>
-        generateQuestion(Math.max(1, Math.ceil((i + 1) / 2))),
-      );
-      const code = await battleApi.createRoom(uid, user.username, user.grade, questions);
+      const firstQ = generateQuestion(1);
+      const code = await battleApi.createRoom(uid, user.username, user.grade, [firstQ], timeLimit(1));
       setRoomCode(code);
       listenRoom(code);
     } finally {
@@ -183,7 +226,7 @@ export function BattleScreen() {
               {isWinner ? 'Bạn thắng!' : `Hạng ${myRank}!`}
             </div>
             <div style={{ fontSize: 14, color: '#7D5A2C', marginTop: 4 }}>
-              {sorted[0][1].username} — {sorted[0][1].score}/{battle.questions.length} câu đúng
+              {sorted[0][1].username} — {sorted[0][1].score} câu đúng
             </div>
           </motion.div>
 
@@ -204,7 +247,7 @@ export function BattleScreen() {
                   <div style={{ fontSize: 12, color: '#7D5A2C' }}>Lớp {p.grade}</div>
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: '#3E2000' }}>
-                  {p.score}<span style={{ fontSize: 12, color: '#9E9E9E' }}>/{battle.questions.length}</span>
+                  {p.score}<span style={{ fontSize: 12, color: '#9E9E9E' }}> câu</span>
                 </div>
               </motion.div>
             ))}
@@ -232,8 +275,17 @@ export function BattleScreen() {
 
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A2C' }}>
-              Câu {battle.currentQuestionIdx + 1}/{battle.questions.length}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A2C' }}>
+                Câu {battle.currentQuestionIdx + 1}
+              </div>
+              {isHost && (
+                <motion.button whileTap={{ scale: 0.9 }}
+                  onPointerDown={() => { void battleApi.finishGame(roomCode); }}
+                  style={{ fontSize: 10, fontWeight: 700, color: '#FF5722', background: '#FBE9E7', border: '1.5px solid #FF5722', borderRadius: 8, padding: '2px 7px', lineHeight: 1.4 }}>
+                  Kết thúc
+                </motion.button>
+              )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <Timer size={14} color={timerColor} />
@@ -378,7 +430,7 @@ export function BattleScreen() {
                   {copied ? <CheckCircle size={20} /> : <Copy size={18} />}
                 </motion.button>
               </div>
-              <div style={{ fontSize: 12, color: '#7D5A2C' }}>{QUESTION_COUNT} câu toán • 15 giây/câu</div>
+              <div style={{ fontSize: 12, color: '#7D5A2C' }}>Toán tốc độ không giới hạn câu</div>
             </motion.div>
           )}
 
@@ -387,7 +439,7 @@ export function BattleScreen() {
             <div style={{ background: '#fff', border: '2px solid #FFD600', borderRadius: 16, padding: '14px 16px', textAlign: 'center', boxShadow: '0 3px 0 #F5A800' }}>
               <div style={{ fontSize: 13, color: '#7D5A2C', fontWeight: 600 }}>Đã vào phòng</div>
               <div style={{ fontSize: 36, fontWeight: 800, color: '#3E2000', letterSpacing: 8, margin: '4px 0' }}>{roomCode}</div>
-              <div style={{ fontSize: 12, color: '#7D5A2C' }}>{QUESTION_COUNT} câu toán • Đang chờ host bắt đầu...</div>
+              <div style={{ fontSize: 12, color: '#7D5A2C' }}>Toán tốc độ không giới hạn câu • Đang chờ host bắt đầu...</div>
             </div>
           )}
 
@@ -501,7 +553,7 @@ export function BattleScreen() {
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.12 }} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: '#3E2000' }}>Cáo Thách Đấu</div>
             <div style={{ fontSize: 14, color: '#7D5A2C', marginTop: 4 }}>
-              {QUESTION_COUNT} câu toán tốc độ • thi đấu real-time
+              Toán tốc độ không giới hạn • thi đấu real-time
             </div>
           </motion.div>
 

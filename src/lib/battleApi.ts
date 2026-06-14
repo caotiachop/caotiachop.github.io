@@ -36,7 +36,6 @@ export const battleApi = {
     if (!snap.exists()) return null;
     const b = snap.data() as Battle;
     if (b.status !== 'waiting') return null;
-    // Already in room → re-connect
     if (b.players[uid]) return b;
     const player: BattlePlayer = { username, grade, score: 0, answerThisQ: null, joinedAt: new Date().toISOString() };
     await updateDoc(ref, { [`players.${uid}`]: player });
@@ -47,7 +46,7 @@ export const battleApi = {
     await updateDoc(doc(db, 'battles', code), {
       status: 'playing',
       currentQuestionIdx: 0,
-      questionStartedAt: new Date(Date.now() + 3200).toISOString(), // 3.2s countdown
+      questionStartedAt: new Date(Date.now() + 3200).toISOString(),
     });
   },
 
@@ -57,17 +56,33 @@ export const battleApi = {
     await updateDoc(doc(db, 'battles', code), up);
   },
 
-  async nextQuestion(code: string, nextIdx: number, total: number, playerUids: string[]): Promise<void> {
-    if (nextIdx >= total) {
-      await updateDoc(doc(db, 'battles', code), { status: 'finished' });
-      return;
+  // Advance to next question, appending a new generated question and updating timePerQuestion
+  async nextQuestion(
+    code: string,
+    nextIdx: number,
+    playerUids: string[],
+    appendQ?: BattleQuestion,
+    newTimePerQ?: number,
+  ): Promise<void> {
+    const ref = doc(db, 'battles', code);
+    let questions: BattleQuestion[] | undefined;
+    if (appendQ) {
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return;
+      questions = [...(snap.data() as Battle).questions, appendQ];
     }
     const up: Record<string, unknown> = {
       currentQuestionIdx: nextIdx,
       questionStartedAt: new Date().toISOString(),
     };
+    if (questions) up['questions'] = questions;
+    if (newTimePerQ !== undefined) up['timePerQuestion'] = newTimePerQ;
     playerUids.forEach(uid => { up[`players.${uid}.answerThisQ`] = null; });
-    await updateDoc(doc(db, 'battles', code), up);
+    await updateDoc(ref, up);
+  },
+
+  async finishGame(code: string): Promise<void> {
+    await updateDoc(doc(db, 'battles', code), { status: 'finished' });
   },
 
   listen(code: string, cb: (b: Battle | null) => void): () => void {

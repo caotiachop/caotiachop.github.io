@@ -45,9 +45,9 @@ export function MenuScreen() {
   });
 
   return (
-    <PageWrapper>
+    <PageWrapper scroll={user?.role !== 'teacher'}>
       <div style={{
-        height: '100%',
+        minHeight: '100%',
         backgroundImage: 'url(/assets/background.webp)',
         backgroundSize: 'cover', backgroundPosition: 'center',
         display: 'flex', flexDirection: 'column',
@@ -102,7 +102,7 @@ export function MenuScreen() {
                 initial={{ opacity: 0, x: fromLeft ? -60 : 60 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.15 + i * 0.09, type: 'spring', stiffness: 260, damping: 24 }}
-                onPointerDown={() => { audio.play('button-click'); navigate(item.route); }}
+                onClick={() => { audio.play('button-click'); navigate(item.route); }}
                 whileTap={{ scale: 0.97, y: 4, boxShadow: 'none' }}
                 style={{
                   display: 'flex',

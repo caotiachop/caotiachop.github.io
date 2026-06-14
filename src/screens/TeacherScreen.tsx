@@ -631,7 +631,7 @@ export function TeacherScreen() {
                           L{s.grade}
                         </span>
                         <motion.button
-                          onPointerDown={() => {
+                          onClick={() => {
                             audio.play("button-click");
                             setSelectedSetId(id);
                             setQSub("detail");

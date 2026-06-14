@@ -101,7 +101,7 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
       const r = el.getBoundingClientRect();
-      setPopup({ chars: LONG_PRESS[key], screenX: r.left + r.width / 2, screenY: r.top });
+      setPopup({ chars: LONG_PRESS[key], screenX: r.left + r.width / 2, screenY: r.top - 8 });
     }, 380);
   };
 
@@ -160,6 +160,10 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
               style={{ position: 'fixed', inset: 0, zIndex: 998 }}
               onPointerDown={() => setPopup(null)}
             />
+            {(() => {
+              const popupLeft = Math.max(6, Math.min(popup.screenX - 148, window.innerWidth - 304));
+              const triLeft = Math.max(14, Math.min(popup.screenX - popupLeft, 278));
+              return (
             <motion.div
               initial={{ opacity: 0, scale: 0.85, y: 6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -167,8 +171,8 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
               transition={{ type: 'spring', stiffness: 420, damping: 24 }}
               style={{
                 position: 'fixed',
-                left: Math.max(6, Math.min(popup.screenX - 148, window.innerWidth - 304)),
-                top: Math.max(6, popup.screenY - 230),
+                left: popupLeft,
+                bottom: Math.max(6, window.innerHeight - popup.screenY + 4),
                 zIndex: 999,
                 background: '#FFFFFF',
                 border: '2.5px solid #FFD600',
@@ -181,10 +185,10 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
                 maxWidth: 'min(calc(100vw - 12px), 296px)',
               }}
             >
-              {/* Triangle pointer */}
+              {/* Triangle pointer — points down toward the key */}
               <div style={{
                 position: 'absolute',
-                bottom: -9, left: '50%', transform: 'translateX(-50%)',
+                bottom: -9, left: triLeft, transform: 'translateX(-50%)',
                 width: 0, height: 0,
                 borderLeft: '8px solid transparent',
                 borderRight: '8px solid transparent',
@@ -192,7 +196,7 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
               }} />
               <div style={{
                 position: 'absolute',
-                bottom: -6, left: '50%', transform: 'translateX(-50%)',
+                bottom: -6, left: triLeft, transform: 'translateX(-50%)',
                 width: 0, height: 0,
                 borderLeft: '6px solid transparent',
                 borderRight: '6px solid transparent',
@@ -216,6 +220,8 @@ export function VirtualTextKeypad({ value, onChange, onSubmit, maxLength = 30, d
                 >{ch}</motion.button>
               ))}
             </motion.div>
+              );
+            })()}
           </>
         )}
       </AnimatePresence>
