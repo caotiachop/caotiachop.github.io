@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,6 +10,7 @@ import {
   Star,
   Music,
   Volume2,
+  Trophy,
 } from "lucide-react";
 import { Confetti } from "../components/Confetti";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,9 +19,11 @@ import { FoxCharacter } from "../components/FoxCharacter";
 import { VirtualKeypad } from "../components/VirtualKeypad";
 import { AppleCount } from "../components/AppleCount";
 import { useApp } from "../lib/store";
+import { api } from "../lib/api";
+import { auth } from "../lib/firebase";
 import { audio } from "../lib/audio";
 import { generateQuestion, timeLimit, requiredCorrect } from "../lib/gameLogic";
-import type { FoxEmotion } from "../types";
+import type { FoxEmotion, Score } from "../types";
 
 type Phase = "countdown" | "playing" | "paused" | "gameover";
 
@@ -41,6 +44,9 @@ export function SpeedGameScreen() {
   const [bestTimeMs, setBestTimeMs] = useState(0);
   const [musicVol, setMusicVol] = useState(() => audio.getMusicVolume());
   const [soundVol, setSoundVol] = useState(() => audio.getSoundVolume());
+  const [allScores, setAllScores] = useState<Record<string, Score> | null>(null);
+  const [rankBump, setRankBump] = useState(false);
+  const prevRankRef = useRef<number | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const levelRef = useRef(level);
@@ -103,6 +109,34 @@ export function SpeedGameScreen() {
   useEffect(() => {
     if (!currentUser) navigate("/", { replace: true });
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    api.getAllScores().then(setAllScores).catch(() => setAllScores({}));
+  }, []);
+
+  const myUid = auth.currentUser?.uid ?? "";
+  const myRank = useMemo(() => {
+    if (!allScores || !myUid) return null;
+    const betterCount = Object.entries(allScores)
+      .filter(([uid]) => uid !== myUid)
+      .filter(([, s]) => {
+        const sg = s.speedGame;
+        if (sg.maxLevel > level) return true;
+        if (sg.maxLevel === level && bestTimeMs > 0 && sg.bestTimeMs > 0 && sg.bestTimeMs < bestTimeMs) return true;
+        return false;
+      }).length;
+    return betterCount + 1;
+  }, [allScores, myUid, level, bestTimeMs]);
+
+  useEffect(() => {
+    if (myRank === null) return;
+    if (prevRankRef.current !== null && myRank < prevRankRef.current) {
+      setRankBump(true);
+      const t = setTimeout(() => setRankBump(false), 700);
+      return () => clearTimeout(t);
+    }
+    prevRankRef.current = myRank;
+  }, [myRank]);
 
   const handleAnswerChange = useCallback(
     (val: string) => {
@@ -221,7 +255,29 @@ export function SpeedGameScreen() {
           >
             <Pause size={20} />
           </motion.button>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            {myRank !== null && (
+              <motion.div
+                animate={rankBump ? { scale: [1, 1.5, 1] } : {}}
+                transition={{ duration: 0.5 }}
+                style={{ textAlign: "center" }}
+              >
+                <div style={{ fontSize: 11, color: "#7D5A2C", fontWeight: 600 }}>
+                  HẠNG
+                </div>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 2, justifyContent: "center",
+                  fontSize: 24, fontWeight: 800, lineHeight: 1,
+                  color: rankBump ? "#F5A800" : myRank <= 3 ? "blackchỉ" : "#3E2000",
+                }}>
+                  <Trophy
+                    size={13}
+                    color={rankBump ? "#F5A800" : myRank <= 3 ? "black" : "#7D5A2C"}
+                  />
+                  {myRank}
+                </div>
+              </motion.div>
+            )}
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 11, color: "#7D5A2C", fontWeight: 600 }}>
                 LEVEL

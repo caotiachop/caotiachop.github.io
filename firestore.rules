@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Public username lookup (login flow)
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Users, scores, progress — requires auth
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /scores/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /userProgress/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Knowledge sets — read: any auth; write: teacher only (enforced app-side)
+    match /knowledgeSets/{setId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Config — read: any auth; write: teacher only (enforced app-side)
+    match /config/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Battle rooms — any auth user can create/join/update
+    match /battles/{roomCode} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

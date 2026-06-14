@@ -13,6 +13,7 @@ const KnowledgeScreen  = lazy(() => import('./screens/KnowledgeScreen').then(m =
 const FashionScreen    = lazy(() => import('./screens/FashionScreen').then(m => ({ default: m.FashionScreen })));
 const LeaderboardScreen = lazy(() => import('./screens/LeaderboardScreen').then(m => ({ default: m.LeaderboardScreen })));
 const TeacherScreen    = lazy(() => import('./screens/TeacherScreen').then(m => ({ default: m.TeacherScreen })));
+const BattleScreen     = lazy(() => import('./screens/BattleScreen').then(m => ({ default: m.BattleScreen })));
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -29,6 +30,8 @@ function AnimatedRoutes() {
             <Route path="/fashion" element={<FashionScreen />} />
             <Route path="/leaderboard" element={<LeaderboardScreen />} />
             <Route path="/teacher" element={<TeacherScreen />} />
+            <Route path="/battle" element={<BattleScreen />} />
+            <Route path="/battle/join/:code" element={<BattleScreen />} />
           </Routes>
         </Suspense>
       </AnimatePresence>

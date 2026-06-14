@@ -47,3 +47,27 @@ export interface AppData {
 }
 
 export type FoxEmotion = 'normal' | 'happy' | 'thinking' | 'angry' | 'sad';
+
+export interface BattlePlayer {
+  username: string;
+  grade: number;
+  score: number;
+  answerThisQ: string | null;
+  joinedAt: string;
+}
+
+export interface BattleQuestion {
+  expression: string;
+  answer: number;
+}
+
+export interface Battle {
+  hostUid: string;
+  status: 'waiting' | 'playing' | 'finished';
+  questions: BattleQuestion[];
+  timePerQuestion: number;
+  currentQuestionIdx: number;
+  questionStartedAt: string | null;
+  players: Record<string, BattlePlayer>;
+  createdAt: string;
+}

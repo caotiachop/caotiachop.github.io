@@ -13,6 +13,7 @@ import type { MenuItemConfig } from '../types';
 const STUDENT_ITEMS = [
   { label: 'Cáo Tia Chớp', sub: 'Toán tốc độ', img: '/assets/fox-job/fast-speed.webp', route: '/speed' },
   { label: 'Cáo Giáo Sư', sub: 'Bộ kiến thức', img: '/assets/fox-job/teacher.webp', route: '/knowledge' },
+  { label: 'Cáo Thách Đấu', sub: 'Thi đấu real-time', img: '/assets/fox-job/speed-two.webp', route: '/battle' },
   { label: 'Cáo Thời Trang', sub: 'Mua trang phục', img: '/assets/fox-job/fasion.webp', route: '/fashion' },
   { label: 'Cáo Thành Tích', sub: 'Bảng xếp hạng', img: '/assets/fox-job/graduade.webp', route: '/leaderboard' },
 ];
