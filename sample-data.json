@@ -1,0 +1,1404 @@
+{
+  "users": {
+    "Giao Vien": {
+      "pin": "0000",
+      "grade": 5,
+      "role": "teacher",
+      "apples": 0,
+      "currentOutfit": "default",
+      "purchasedOutfits": { "default": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2025-01-01T00:00:00.000Z"
+    },
+    "Hoc Sinh": {
+      "pin": "1111",
+      "grade": 3,
+      "role": "student",
+      "apples": 50,
+      "currentOutfit": "default",
+      "purchasedOutfits": { "default": true },
+      "settings": { "music": true, "sound": true },
+      "createdAt": "2025-01-01T00:00:00.000Z"
+    }
+  },
+  "scores": {
+    "Giao Vien": {
+      "maxApples": 0,
+      "speedGame": { "maxLevel": 0, "bestTimeMs": 0 },
+      "fashionCompletedAt": null
+    },
+    "Hoc Sinh": {
+      "maxApples": 50,
+      "speedGame": { "maxLevel": 3, "bestTimeMs": 12500 },
+      "fashionCompletedAt": null
+    }
+  },
+  "userProgress": {
+    "Giao Vien": { "completedSetIds": {} },
+    "Hoc Sinh": { "completedSetIds": { "g1ch1": true, "g1ch2": true } }
+  },
+  "knowledgeSets": {
+
+    "g1ch1": {
+      "grade": 1,
+      "topic": "Các số trong phạm vi 10",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Số nào đứng sau số 5?",
+          "answers": { "A": "4", "B": "6", "C": "7", "D": "8" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "Số nào đứng trước số 9?",
+          "answers": { "A": "10", "B": "8", "C": "7", "D": "6" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Số nào lớn nhất trong các số: 3, 7, 5, 9, 2?",
+          "answers": { "A": "7", "B": "5", "C": "3", "D": "9" },
+          "correctKey": "D",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "Số nào nhỏ nhất trong các số: 4, 8, 1, 6, 3?",
+          "answers": { "A": "3", "B": "1", "C": "4", "D": "6" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Điền vào chỗ trống: 3, 4, 5, ?, 7",
+          "answers": { "A": "5", "B": "8", "C": "6", "D": "9" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        }
+      }
+    },
+
+    "g1ch2": {
+      "grade": 1,
+      "topic": "Phép cộng trong phạm vi 10",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "3 + 4 = ?",
+          "answers": { "A": "6", "B": "7", "C": "8", "D": "9" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "5 + 3 = ?",
+          "answers": { "A": "7", "B": "9", "C": "8", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "2 + 7 = ?",
+          "answers": { "A": "8", "B": "10", "C": "9", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "6 + 4 = ?",
+          "answers": { "A": "9", "B": "11", "C": "8", "D": "10" },
+          "correctKey": "D",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "? + 3 = 8. Số cần điền là:",
+          "answers": { "A": "5", "B": "4", "C": "6", "D": "3" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "4 + ? = 9. Số cần điền là:",
+          "answers": { "A": "4", "B": "6", "C": "5", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Lan có 3 quả táo, mẹ cho thêm 4 quả. Lan có tất cả mấy quả táo?",
+          "answers": { "A": "6", "B": "8", "C": "7", "D": "5" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "1 + ? = 7. Số cần điền là:",
+          "answers": { "A": "5", "B": "6", "C": "7", "D": "4" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Tổng của 5 và 4 là:",
+          "answers": { "A": "10", "B": "8", "C": "7", "D": "9" },
+          "correctKey": "D",
+          "difficulty": "easy"
+        },
+        "q10": {
+          "question": "Trên cây có 6 con chim, bay đến thêm 3 con. Trên cây có bao nhiêu con chim?",
+          "answers": { "A": "10", "B": "8", "C": "9", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g1ch3": {
+      "grade": 1,
+      "topic": "Phép trừ trong phạm vi 10",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "8 - 3 = ?",
+          "answers": { "A": "4", "B": "6", "C": "5", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "9 - 4 = ?",
+          "answers": { "A": "6", "B": "5", "C": "4", "D": "7" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "10 - 6 = ?",
+          "answers": { "A": "3", "B": "5", "C": "4", "D": "2" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "7 - 0 = ?",
+          "answers": { "A": "0", "B": "8", "C": "7", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "? - 3 = 5. Số cần điền là:",
+          "answers": { "A": "9", "B": "7", "C": "8", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "10 - ? = 4. Số cần điền là:",
+          "answers": { "A": "7", "B": "5", "C": "6", "D": "8" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Có 8 con gà, đi mất 3 con. Còn lại mấy con?",
+          "answers": { "A": "4", "B": "6", "C": "5", "D": "3" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "9 - ? = 3. Số cần điền là:",
+          "answers": { "A": "6", "B": "5", "C": "7", "D": "4" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Hiệu của 10 và 7 là:",
+          "answers": { "A": "2", "B": "4", "C": "3", "D": "5" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q10": {
+          "question": "An có 9 viên bi, cho Bình 5 viên. An còn lại mấy viên bi?",
+          "answers": { "A": "3", "B": "5", "C": "4", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g2ch1": {
+      "grade": 2,
+      "topic": "Số trong phạm vi 1 000 – Cộng trừ có nhớ",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Số 347 gồm mấy trăm, mấy chục, mấy đơn vị?",
+          "answers": { "A": "3 trăm, 4 chục, 8 đơn vị", "B": "3 trăm, 4 chục, 7 đơn vị", "C": "4 trăm, 3 chục, 7 đơn vị", "D": "3 trăm, 7 chục, 4 đơn vị" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "456 + 123 = ?",
+          "answers": { "A": "579", "B": "589", "C": "569", "D": "478" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "789 - 234 = ?",
+          "answers": { "A": "545", "B": "555", "C": "565", "D": "456" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "Số liền trước của 500 là:",
+          "answers": { "A": "501", "B": "499", "C": "490", "D": "510" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Số liền sau của 999 là:",
+          "answers": { "A": "998", "B": "1000", "C": "1001", "D": "990" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "So sánh: 367 … 376",
+          "answers": { "A": ">", "B": "=", "C": "<", "D": "Không so sánh được" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q07": {
+          "question": "432 + 258 = ?",
+          "answers": { "A": "680", "B": "690", "C": "670", "D": "700" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "800 - 356 = ?",
+          "answers": { "A": "444", "B": "454", "C": "434", "D": "464" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Số có 5 trăm, 6 chục, 3 đơn vị là:",
+          "answers": { "A": "563", "B": "356", "C": "653", "D": "365" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q10": {
+          "question": "Điền dấu thích hợp: 500 + 200 … 750",
+          "answers": { "A": ">", "B": "<", "C": "=", "D": "Không xác định" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g2ch2": {
+      "grade": 2,
+      "topic": "Bảng nhân (2, 3, 4, 5)",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "3 × 4 = ?",
+          "answers": { "A": "10", "B": "14", "C": "12", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "5 × 6 = ?",
+          "answers": { "A": "11", "B": "30", "C": "25", "D": "35" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "2 × 9 = ?",
+          "answers": { "A": "11", "B": "16", "C": "18", "D": "20" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "4 × 7 = ?",
+          "answers": { "A": "24", "B": "11", "C": "28", "D": "32" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "? × 5 = 35. Số cần điền là:",
+          "answers": { "A": "6", "B": "8", "C": "9", "D": "7" },
+          "correctKey": "D",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "3 × ? = 24. Số cần điền là:",
+          "answers": { "A": "7", "B": "8", "C": "9", "D": "6" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Mỗi hộp có 4 quả cam. 5 hộp có bao nhiêu quả cam?",
+          "answers": { "A": "9", "B": "16", "C": "20", "D": "25" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "6 × 6 = ?",
+          "answers": { "A": "12", "B": "30", "C": "36", "D": "42" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q09": {
+          "question": "8 × 3 = ?",
+          "answers": { "A": "11", "B": "24", "C": "28", "D": "32" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q10": {
+          "question": "Tích của 7 và 4 là:",
+          "answers": { "A": "11", "B": "3", "C": "28", "D": "21" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        }
+      }
+    },
+
+    "g2ch3": {
+      "grade": 2,
+      "topic": "Bảng chia (2, 3, 4, 5)",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "12 ÷ 4 = ?",
+          "answers": { "A": "2", "B": "3", "C": "4", "D": "6" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "20 ÷ 5 = ?",
+          "answers": { "A": "3", "B": "5", "C": "4", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "30 ÷ 6 = ?",
+          "answers": { "A": "4", "B": "6", "C": "5", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "? ÷ 3 = 8. Số bị chia là:",
+          "answers": { "A": "11", "B": "24", "C": "27", "D": "5" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "Có 24 cây bút chia đều cho 8 bạn. Mỗi bạn được mấy cây bút?",
+          "answers": { "A": "2", "B": "3", "C": "4", "D": "5" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g3ch1": {
+      "grade": 3,
+      "topic": "Số trong phạm vi 10 000 – Cộng trừ",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Số mười nghìn viết là:",
+          "answers": { "A": "1 000", "B": "100 000", "C": "10 000", "D": "10" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "3 456 + 2 341 = ?",
+          "answers": { "A": "5 797", "B": "5 887", "C": "5 697", "D": "5 698" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "8 000 - 3 456 = ?",
+          "answers": { "A": "4 544", "B": "4 554", "C": "4 444", "D": "4 534" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "Số 7 485 gồm bao nhiêu nghìn, trăm, chục, đơn vị?",
+          "answers": { "A": "7 nghìn, 4 trăm, 8 chục, 5 đơn vị", "B": "7 nghìn, 5 trăm, 8 chục, 4 đơn vị", "C": "4 nghìn, 7 trăm, 8 chục, 5 đơn vị", "D": "7 nghìn, 8 trăm, 4 chục, 5 đơn vị" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "6 000 + 400 + 50 + 3 = ?",
+          "answers": { "A": "6 453", "B": "6 435", "C": "6 543", "D": "6 354" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "5 678 làm tròn đến hàng trăm là:",
+          "answers": { "A": "5 600", "B": "5 700", "C": "5 680", "D": "6 000" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "So sánh: 4 321 … 4 312",
+          "answers": { "A": "<", "B": "=", "C": ">", "D": "Không so sánh được" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q08": {
+          "question": "2 500 + 3 700 = ?",
+          "answers": { "A": "5 200", "B": "6 200", "C": "6 000", "D": "5 000" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "9 000 - 5 678 = ?",
+          "answers": { "A": "3 312", "B": "3 422", "C": "3 322", "D": "3 212" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Số lớn nhất có 4 chữ số là:",
+          "answers": { "A": "9 000", "B": "9 999", "C": "9 900", "D": "1 000" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        }
+      }
+    },
+
+    "g3ch2": {
+      "grade": 3,
+      "topic": "Nhân, chia với số có một chữ số",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "1 234 × 2 = ?",
+          "answers": { "A": "2 468", "B": "2 458", "C": "2 478", "D": "2 486" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "3 456 × 3 = ?",
+          "answers": { "A": "9 358", "B": "10 268", "C": "10 368", "D": "9 368" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q03": {
+          "question": "2 468 ÷ 2 = ?",
+          "answers": { "A": "1 234", "B": "1 243", "C": "1 324", "D": "1 342" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "5 670 ÷ 3 = ?",
+          "answers": { "A": "1 890", "B": "1 980", "C": "1 900", "D": "1 810" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "3 000 × 4 = ?",
+          "answers": { "A": "7 000", "B": "12 000", "C": "1 200", "D": "120" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "8 000 ÷ 4 = ?",
+          "answers": { "A": "200", "B": "2 000", "C": "20", "D": "32 000" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q07": {
+          "question": "1 365 × 5 = ?",
+          "answers": { "A": "6 825", "B": "6 852", "C": "6 725", "D": "6 835" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "7 248 ÷ 6 = ?",
+          "answers": { "A": "1 208", "B": "1 280", "C": "1 248", "D": "1 224" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Mỗi thùng có 245 cái bánh. 4 thùng có bao nhiêu cái bánh?",
+          "answers": { "A": "980", "B": "940", "C": "960", "D": "920" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Có 936 học sinh chia đều thành 3 lớp. Mỗi lớp có bao nhiêu học sinh?",
+          "answers": { "A": "312", "B": "321", "C": "302", "D": "301" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g3ch3": {
+      "grade": 3,
+      "topic": "Diện tích – Đơn vị đo",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "1 dm² = ? cm²",
+          "answers": { "A": "10", "B": "100", "C": "1 000", "D": "10 000" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "Diện tích hình chữ nhật có chiều dài 5 cm, chiều rộng 3 cm là:",
+          "answers": { "A": "15 cm", "B": "15 cm²", "C": "16 cm²", "D": "8 cm²" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Diện tích hình vuông có cạnh 4 cm là:",
+          "answers": { "A": "16 cm", "B": "16 cm²", "C": "8 cm²", "D": "12 cm²" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "Hình chữ nhật có diện tích 24 cm², chiều dài 6 cm. Chiều rộng là:",
+          "answers": { "A": "4 cm", "B": "18 cm", "C": "144 cm", "D": "3 cm" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "1 m² = ? dm²",
+          "answers": { "A": "10", "B": "1 000", "C": "100", "D": "10 000" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g3ch4": {
+      "grade": 3,
+      "topic": "Giới thiệu phân số và hình học",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Một phần ba được viết là:",
+          "answers": { "A": "1/2", "B": "1/3", "C": "3/1", "D": "2/3" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "Phân số 3/5 biểu thị:",
+          "answers": { "A": "5 phần trong 3", "B": "3 phần trong 5", "C": "3 phần trong 8", "D": "5 phần trong 8" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Hình nào có một nửa được tô màu khi chia đều thành 4 phần và tô 2 phần?",
+          "answers": { "A": "1/4", "B": "1/2", "C": "2/3", "D": "3/4" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "Chu vi hình vuông có cạnh 7 cm là:",
+          "answers": { "A": "28 cm", "B": "49 cm²", "C": "14 cm", "D": "21 cm" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Chu vi hình chữ nhật có chiều dài 8 cm, chiều rộng 5 cm là:",
+          "answers": { "A": "40 cm", "B": "13 cm", "C": "26 cm", "D": "24 cm" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g4ch1": {
+      "grade": 4,
+      "topic": "Số tự nhiên và phép tính",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Số tự nhiên lớn nhất có 6 chữ số là:",
+          "answers": { "A": "100 000", "B": "999 999", "C": "999 000", "D": "900 000" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "23 456 + 41 789 = ?",
+          "answers": { "A": "65 245", "B": "65 235", "C": "65 145", "D": "64 245" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q03": {
+          "question": "87 654 - 23 456 = ?",
+          "answers": { "A": "64 198", "B": "64 208", "C": "64 188", "D": "63 198" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "Trong số 345 678, chữ số hàng chục nghìn là:",
+          "answers": { "A": "3", "B": "4", "C": "5", "D": "6" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "1 000 000 đọc là:",
+          "answers": { "A": "Một trăm nghìn", "B": "Mười triệu", "C": "Một triệu", "D": "Một tỉ" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "56 789 làm tròn đến hàng nghìn là:",
+          "answers": { "A": "56 000", "B": "57 000", "C": "56 800", "D": "56 900" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "100 000 - 1 = ?",
+          "answers": { "A": "99 000", "B": "99 900", "C": "99 999", "D": "98 999" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q08": {
+          "question": "Trung bình cộng của 4 số: 10, 20, 30, 40 là:",
+          "answers": { "A": "25", "B": "30", "C": "100", "D": "20" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "5 × (3 + 4) = ?",
+          "answers": { "A": "19", "B": "35", "C": "32", "D": "17" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "(24 + 16) ÷ 4 = ?",
+          "answers": { "A": "10", "B": "40", "C": "8", "D": "16" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q11": {
+          "question": "Trong 1 giờ có bao nhiêu phút?",
+          "answers": { "A": "100", "B": "60", "C": "30", "D": "24" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q12": {
+          "question": "1 km = ? m",
+          "answers": { "A": "100", "B": "10", "C": "1 000", "D": "10 000" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q13": {
+          "question": "1 tấn = ? kg",
+          "answers": { "A": "100", "B": "10 000", "C": "1 000", "D": "100 000" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q14": {
+          "question": "Thực hiện phép tính: 36 ÷ 4 + 5 × 2 = ?",
+          "answers": { "A": "19", "B": "23", "C": "13", "D": "27" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q15": {
+          "question": "Tổng của hai số là 120, số lớn hơn số nhỏ 20 đơn vị. Số lớn là:",
+          "answers": { "A": "70", "B": "60", "C": "80", "D": "50" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g4ch2": {
+      "grade": 4,
+      "topic": "Phép nhân và phép chia (có 2-3 chữ số)",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "345 × 2 = ?",
+          "answers": { "A": "680", "B": "690", "C": "700", "D": "670" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "1 234 × 5 = ?",
+          "answers": { "A": "6 170", "B": "6 060", "C": "6 100", "D": "6 000" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q03": {
+          "question": "678 ÷ 3 = ?",
+          "answers": { "A": "226", "B": "222", "C": "232", "D": "224" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "2 345 × 3 = ?",
+          "answers": { "A": "7 035", "B": "7 045", "C": "7 135", "D": "7 055" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "4 872 ÷ 4 = ?",
+          "answers": { "A": "1 218", "B": "1 228", "C": "1 208", "D": "1 238" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "135 × 24 = ?",
+          "answers": { "A": "3 240", "B": "3 200", "C": "3 140", "D": "3 340" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q07": {
+          "question": "864 ÷ 12 = ?",
+          "answers": { "A": "62", "B": "72", "C": "82", "D": "68" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "567 × 30 = ?",
+          "answers": { "A": "16 010", "B": "17 010", "C": "17 000", "D": "16 100" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q09": {
+          "question": "2 400 ÷ 40 = ?",
+          "answers": { "A": "50", "B": "40", "C": "60", "D": "80" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Mỗi ngày một nhà máy sản xuất 1 256 sản phẩm. Trong 5 ngày sản xuất được bao nhiêu?",
+          "answers": { "A": "6 280", "B": "6 180", "C": "5 280", "D": "6 380" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q11": {
+          "question": "256 × 45 = ?",
+          "answers": { "A": "11 520", "B": "11 420", "C": "10 520", "D": "11 620" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q12": {
+          "question": "1 980 ÷ 36 = ?",
+          "answers": { "A": "45", "B": "55", "C": "50", "D": "60" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q13": {
+          "question": "Có 2 400 quyển sách xếp đều vào 48 hộp. Mỗi hộp có bao nhiêu quyển?",
+          "answers": { "A": "40", "B": "50", "C": "60", "D": "45" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q14": {
+          "question": "3 × 4 × 5 = ?",
+          "answers": { "A": "60", "B": "12", "C": "20", "D": "35" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q15": {
+          "question": "720 ÷ 9 ÷ 8 = ?",
+          "answers": { "A": "10", "B": "5", "C": "15", "D": "20" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g4ch3": {
+      "grade": 4,
+      "topic": "Phân số – So sánh và rút gọn",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Phân số nào bằng 1/2?",
+          "answers": { "A": "2/6", "B": "3/6", "C": "4/6", "D": "5/6" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "So sánh: 3/5 … 2/5",
+          "answers": { "A": "<", "B": "=", "C": ">", "D": "Không so sánh được" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "1/4 + 2/4 = ?",
+          "answers": { "A": "3/8", "B": "2/4", "C": "3/4", "D": "1/2" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "5/6 - 2/6 = ?",
+          "answers": { "A": "3/12", "B": "3/6", "C": "7/6", "D": "2/6" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Phân số tối giản của 4/8 là:",
+          "answers": { "A": "2/4", "B": "1/2", "C": "3/6", "D": "4/8" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "Quy đồng mẫu số 1/3 và 1/4. Mẫu số chung nhỏ nhất là:",
+          "answers": { "A": "6", "B": "8", "C": "12", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "1/3 + 1/4 = ?",
+          "answers": { "A": "2/7", "B": "7/12", "C": "5/12", "D": "1/12" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q08": {
+          "question": "Phân số nào lớn hơn 1?",
+          "answers": { "A": "3/5", "B": "5/7", "C": "7/5", "D": "4/9" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "3/4 của 20 là:",
+          "answers": { "A": "12", "B": "15", "C": "16", "D": "10" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Một nửa của 3/4 là:",
+          "answers": { "A": "3/2", "B": "3/8", "C": "6/8", "D": "1/4" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g4ch4": {
+      "grade": 4,
+      "topic": "Hình học – Diện tích và chu vi",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Diện tích hình chữ nhật dài 12 cm, rộng 8 cm là:",
+          "answers": { "A": "40 cm²", "B": "96 cm²", "C": "20 cm²", "D": "80 cm²" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "Diện tích hình vuông cạnh 9 cm là:",
+          "answers": { "A": "36 cm²", "B": "81 cm²", "C": "72 cm²", "D": "18 cm²" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Chu vi hình chữ nhật dài 15 cm, rộng 10 cm là:",
+          "answers": { "A": "150 cm", "B": "25 cm", "C": "50 cm", "D": "40 cm" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "Góc vuông có số đo bằng:",
+          "answers": { "A": "45°", "B": "90°", "C": "120°", "D": "180°" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Góc nhọn là góc có số đo:",
+          "answers": { "A": "Bằng 90°", "B": "Lớn hơn 90°", "C": "Nhỏ hơn 90°", "D": "Bằng 180°" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "Hình thang có đặc điểm gì?",
+          "answers": { "A": "Có 3 cạnh", "B": "Có 1 cặp cạnh song song", "C": "Có 5 cạnh", "D": "Tất cả cạnh bằng nhau" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Diện tích hình thang có đáy lớn 10 cm, đáy nhỏ 6 cm, chiều cao 4 cm là:",
+          "answers": { "A": "16 cm²", "B": "60 cm²", "C": "32 cm²", "D": "40 cm²" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "Chu vi hình tròn bán kính 7 cm (π ≈ 3,14) là:",
+          "answers": { "A": "21,98 cm", "B": "43,96 cm", "C": "153,86 cm", "D": "14 cm" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Diện tích hình tròn bán kính 5 cm (π ≈ 3,14) là:",
+          "answers": { "A": "31,4 cm²", "B": "78,5 cm²", "C": "15,7 cm²", "D": "62,8 cm²" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Hình vuông khác hình chữ nhật ở điểm nào?",
+          "answers": { "A": "Số cạnh", "B": "Số góc", "C": "Tất cả cạnh đều bằng nhau", "D": "Tất cả góc đều vuông" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g4ch5": {
+      "grade": 4,
+      "topic": "Đo lường – Thời gian, khối lượng, độ dài",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "1 giờ bằng bao nhiêu phút và bao nhiêu giây?",
+          "answers": { "A": "30 phút = 1 800 giây", "B": "60 phút = 3 600 giây", "C": "60 phút = 600 giây", "D": "100 phút = 6 000 giây" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "3 giờ 45 phút = ? phút",
+          "answers": { "A": "215", "B": "225", "C": "345", "D": "200" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q03": {
+          "question": "1 kg = ? g",
+          "answers": { "A": "100", "B": "10", "C": "1 000", "D": "10 000" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "2 tấn 5 tạ = ? kg  (1 tạ = 100 kg)",
+          "answers": { "A": "2 500", "B": "2 050", "C": "25 000", "D": "205" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "5 km 3 hm = ? m  (1 hm = 100 m)",
+          "answers": { "A": "5 300", "B": "530", "C": "53 000", "D": "503" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        }
+      }
+    },
+
+    "g5ch1": {
+      "grade": 5,
+      "topic": "Phân số – Nhân và chia phân số",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "2/3 × 3/4 = ?",
+          "answers": { "A": "5/7", "B": "1/2", "C": "6/7", "D": "1/4" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q02": {
+          "question": "3/5 ÷ 2/5 = ?",
+          "answers": { "A": "3/2", "B": "6/25", "C": "1", "D": "2/3" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q03": {
+          "question": "1/2 + 1/3 = ?",
+          "answers": { "A": "2/5", "B": "2/6", "C": "5/6", "D": "3/5" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "3/4 - 1/6 = ?",
+          "answers": { "A": "2/3", "B": "7/12", "C": "1/2", "D": "11/12" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q05": {
+          "question": "Rút gọn phân số 12/18 được:",
+          "answers": { "A": "6/9", "B": "4/6", "C": "2/3", "D": "3/4" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "5/6 × 12 = ?",
+          "answers": { "A": "8", "B": "10", "C": "9", "D": "12" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "2/3 ÷ 4 = ?",
+          "answers": { "A": "8/3", "B": "2/12", "C": "1/6", "D": "1/3" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "Tổng của 1/4 và 3/8 là:",
+          "answers": { "A": "4/12", "B": "5/8", "C": "4/8", "D": "2/8" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "3/7 × 7/9 = ?",
+          "answers": { "A": "10/16", "B": "21/63", "C": "1/3", "D": "3/9" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Một mảnh vải dài 5/6 m, cắt thành đoạn 1/6 m. Được bao nhiêu đoạn?",
+          "answers": { "A": "4", "B": "5", "C": "6", "D": "3" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q11": {
+          "question": "4/5 của 25 kg là:",
+          "answers": { "A": "18 kg", "B": "20 kg", "C": "16 kg", "D": "24 kg" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q12": {
+          "question": "Hiệu của 7/8 và 3/8 là:",
+          "answers": { "A": "4/8", "B": "1/2", "C": "10/8", "D": "4/16" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q13": {
+          "question": "Phân số nào lớn hơn 1/2 nhưng nhỏ hơn 1?",
+          "answers": { "A": "1/3", "B": "3/4", "C": "2/5", "D": "1/4" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q14": {
+          "question": "Hình chữ nhật có chu vi 24 cm, chiều dài 7 cm. Chiều rộng là:",
+          "answers": { "A": "4 cm", "B": "5 cm", "C": "6 cm", "D": "3 cm" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q15": {
+          "question": "1/3 + 1/4 + 1/6 = ?",
+          "answers": { "A": "3/13", "B": "3/4", "C": "1/2", "D": "7/12" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g5ch2": {
+      "grade": 5,
+      "topic": "Số thập phân – Cộng, trừ, nhân, chia",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "0,5 = ?",
+          "answers": { "A": "1/5", "B": "1/2", "C": "5/100", "D": "5/1000" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "3,14 đọc là:",
+          "answers": { "A": "Ba phẩy mười bốn", "B": "Ba phẩy một bốn", "C": "Ba mười bốn", "D": "Ba trăm mười bốn" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "1,5 + 2,3 = ?",
+          "answers": { "A": "3,8", "B": "3,7", "C": "3,9", "D": "4,8" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "5,7 - 2,4 = ?",
+          "answers": { "A": "3,2", "B": "3,3", "C": "3,4", "D": "8,1" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "3,5 × 2 = ?",
+          "answers": { "A": "6,5", "B": "7,0", "C": "7,5", "D": "5,5" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q06": {
+          "question": "6,4 ÷ 2 = ?",
+          "answers": { "A": "3,2", "B": "3,4", "C": "12,8", "D": "4,2" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q07": {
+          "question": "0,3 × 0,4 = ?",
+          "answers": { "A": "0,12", "B": "1,2", "C": "0,012", "D": "12" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "1,44 ÷ 0,4 = ?",
+          "answers": { "A": "0,36", "B": "3,6", "C": "36", "D": "0,036" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Số thập phân nào lớn nhất?",
+          "answers": { "A": "2,35", "B": "2,4", "C": "2,305", "D": "2,039" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "2,5 × 4,2 = ?",
+          "answers": { "A": "10,5", "B": "9,5", "C": "10,0", "D": "10,8" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q11": {
+          "question": "15,6 ÷ 0,6 = ?",
+          "answers": { "A": "2,6", "B": "26", "C": "260", "D": "9,36" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q12": {
+          "question": "3,6 + 2,75 = ?",
+          "answers": { "A": "6,25", "B": "6,35", "C": "5,35", "D": "6,45" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q13": {
+          "question": "8,1 - 3,45 = ?",
+          "answers": { "A": "4,65", "B": "4,75", "C": "5,65", "D": "4,55" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q14": {
+          "question": "0,125 × 8 = ?",
+          "answers": { "A": "0,100", "B": "0,01", "C": "1,0", "D": "1,025" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q15": {
+          "question": "Cuộn dây dài 5,4 m cắt thành đoạn 0,9 m. Được bao nhiêu đoạn?",
+          "answers": { "A": "5", "B": "6", "C": "7", "D": "4" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q16": {
+          "question": "Làm tròn 3,456 đến hàng phần mười:",
+          "answers": { "A": "3,4", "B": "3,5", "C": "3,46", "D": "3,0" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q17": {
+          "question": "1,2 × 0,5 × 4 = ?",
+          "answers": { "A": "2,4", "B": "2,0", "C": "2,8", "D": "1,6" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q18": {
+          "question": "Số thập phân 12,5 viết dưới dạng phân số tối giản là:",
+          "answers": { "A": "12/5", "B": "25/2", "C": "125/100", "D": "5/12" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q19": {
+          "question": "4,56 ÷ 1,2 = ?",
+          "answers": { "A": "3,8", "B": "3,5", "C": "4,0", "D": "3,6" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q20": {
+          "question": "Giá trị của biểu thức: 2,5² - 1,5² = ?",
+          "answers": { "A": "4", "B": "1", "C": "6,25", "D": "10" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g5ch3": {
+      "grade": 5,
+      "topic": "Tỉ số, tỉ lệ và tỉ số phần trăm",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Tỉ số giữa 3 và 5 là:",
+          "answers": { "A": "3 + 5", "B": "5/3", "C": "3/5", "D": "3 - 5" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "25% = ?",
+          "answers": { "A": "1/4", "B": "1/2", "C": "3/4", "D": "1/5" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "50% của 80 là:",
+          "answers": { "A": "30", "B": "40", "C": "50", "D": "60" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "30% của 150 là:",
+          "answers": { "A": "30", "B": "35", "C": "45", "D": "50" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "Lớp có 40 học sinh, 60% là học sinh nữ. Số học sinh nữ là:",
+          "answers": { "A": "20", "B": "24", "C": "28", "D": "16" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "5 tỉ lệ với 8 như 15 tỉ lệ với ?",
+          "answers": { "A": "18", "B": "24", "C": "20", "D": "22" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Bản đồ tỉ lệ 1:1 000. Đoạn 5 cm trên bản đồ ứng với chiều dài thực tế là:",
+          "answers": { "A": "500 m", "B": "50 m", "C": "5 000 m", "D": "5 m" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q08": {
+          "question": "Giá tăng từ 100 000 lên 120 000 đồng. Tăng bao nhiêu phần trăm?",
+          "answers": { "A": "20%", "B": "25%", "C": "15%", "D": "10%" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "75% = ?",
+          "answers": { "A": "7/5", "B": "7/10", "C": "3/4", "D": "1/4" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q10": {
+          "question": "40% của một số là 60. Tìm số đó.",
+          "answers": { "A": "120", "B": "150", "C": "180", "D": "24" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        }
+      }
+    },
+
+    "g5ch4": {
+      "grade": 5,
+      "topic": "Hình học không gian – Diện tích và thể tích",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Hình hộp chữ nhật có bao nhiêu mặt?",
+          "answers": { "A": "4", "B": "6", "C": "8", "D": "12" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        },
+        "q02": {
+          "question": "Thể tích hình hộp chữ nhật dài 5 cm, rộng 4 cm, cao 3 cm là:",
+          "answers": { "A": "60 cm³", "B": "47 cm³", "C": "20 cm³", "D": "12 cm³" },
+          "correctKey": "A",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Thể tích hình lập phương cạnh 4 cm là:",
+          "answers": { "A": "16 cm³", "B": "12 cm³", "C": "64 cm³", "D": "48 cm³" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q04": {
+          "question": "Diện tích toàn phần hình lập phương cạnh 3 cm là:",
+          "answers": { "A": "54 cm²", "B": "27 cm²", "C": "36 cm²", "D": "18 cm²" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q05": {
+          "question": "Diện tích hình thang có đáy lớn 12 cm, đáy nhỏ 8 cm, chiều cao 5 cm là:",
+          "answers": { "A": "50 cm²", "B": "60 cm²", "C": "100 cm²", "D": "40 cm²" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q06": {
+          "question": "Diện tích hình tròn bán kính 10 cm (π ≈ 3,14) là:",
+          "answers": { "A": "31,4 cm²", "B": "62,8 cm²", "C": "314 cm²", "D": "100 cm²" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q07": {
+          "question": "Chu vi hình tròn đường kính 14 cm (π ≈ 3,14) là:",
+          "answers": { "A": "43,96 cm", "B": "87,92 cm", "C": "153,86 cm", "D": "21,98 cm" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q08": {
+          "question": "Thể tích hình hộp chữ nhật 8 cm × 6 cm × 4 cm là:",
+          "answers": { "A": "192 cm³", "B": "164 cm³", "C": "128 cm³", "D": "208 cm³" },
+          "correctKey": "A",
+          "difficulty": "medium"
+        },
+        "q09": {
+          "question": "Diện tích xung quanh hình hộp chữ nhật dài 10 cm, rộng 6 cm, cao 5 cm là:",
+          "answers": { "A": "140 cm²", "B": "160 cm²", "C": "120 cm²", "D": "300 cm²" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q10": {
+          "question": "Hình hộp chữ nhật có thể tích 120 cm³, dài 6 cm, rộng 5 cm. Chiều cao là:",
+          "answers": { "A": "3 cm", "B": "4 cm", "C": "5 cm", "D": "2 cm" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q11": {
+          "question": "Hình lập phương có tổng độ dài 12 cạnh là 48 cm. Thể tích là:",
+          "answers": { "A": "64 cm³", "B": "512 cm³", "C": "256 cm³", "D": "8 cm³" },
+          "correctKey": "A",
+          "difficulty": "hard"
+        },
+        "q12": {
+          "question": "Bán kính hình tròn có diện tích 78,5 cm² (π ≈ 3,14) là:",
+          "answers": { "A": "25 cm", "B": "5 cm", "C": "10 cm", "D": "3,5 cm" },
+          "correctKey": "B",
+          "difficulty": "hard"
+        },
+        "q13": {
+          "question": "Diện tích hình bình hành có đáy 12 cm, chiều cao 8 cm là:",
+          "answers": { "A": "40 cm²", "B": "120 cm²", "C": "96 cm²", "D": "48 cm²" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q14": {
+          "question": "Hình lăng trụ tam giác có bao nhiêu mặt?",
+          "answers": { "A": "3", "B": "4", "C": "5", "D": "6" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q15": {
+          "question": "Diện tích một mặt hình lập phương cạnh 6 cm là:",
+          "answers": { "A": "24 cm²", "B": "36 cm²", "C": "216 cm²", "D": "12 cm²" },
+          "correctKey": "B",
+          "difficulty": "easy"
+        }
+      }
+    },
+
+    "g5ch5": {
+      "grade": 5,
+      "topic": "Thống kê và xác suất cơ bản",
+      "createdBy": "Giao Vien",
+      "questions": {
+        "q01": {
+          "question": "Điểm thi của 5 học sinh: 7, 8, 9, 6, 5. Điểm trung bình là:",
+          "answers": { "A": "6", "B": "7", "C": "8", "D": "9" },
+          "correctKey": "B",
+          "difficulty": "medium"
+        },
+        "q02": {
+          "question": "Dãy số: 3, 5, 7, 5, 4, 5, 6. Số xuất hiện nhiều nhất là:",
+          "answers": { "A": "3", "B": "4", "C": "5", "D": "7" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        },
+        "q03": {
+          "question": "Trong túi có 3 bi đỏ và 2 bi xanh. Xác suất lấy được bi đỏ là:",
+          "answers": { "A": "2/5", "B": "3/2", "C": "3/5", "D": "1/2" },
+          "correctKey": "C",
+          "difficulty": "medium"
+        },
+        "q04": {
+          "question": "Nhiệt độ một tuần: 30, 32, 28, 31, 29, 30, 33°C. Nhiệt độ cao nhất là:",
+          "answers": { "A": "30°C", "B": "32°C", "C": "28°C", "D": "33°C" },
+          "correctKey": "D",
+          "difficulty": "easy"
+        },
+        "q05": {
+          "question": "Lớp 5A có 35 HS, 5B có 32 HS, 5C có 38 HS. Lớp nào nhiều học sinh nhất?",
+          "answers": { "A": "5A", "B": "5B", "C": "5C", "D": "Bằng nhau" },
+          "correctKey": "C",
+          "difficulty": "easy"
+        }
+      }
+    }
+
+  },
+  "menuConfig": {}
+}
