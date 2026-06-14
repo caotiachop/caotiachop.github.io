@@ -11,6 +11,8 @@ class AudioService {
   private soundEnabled = true;
   private _musicVol = DEFAULT_MUSIC_VOL;
   private _soundVol = DEFAULT_SOUND_VOL;
+  // Ghi nhớ nhạc có đang phát trước khi tab bị ẩn không
+  private _wasPlayingBeforeHidden = false;
 
   init() {
     this.music = new Audio('/assets/audio/theme-music.mp3');
@@ -22,9 +24,20 @@ class AudioService {
       el.volume = this._soundVol;
       this.sfx[name] = el;
     });
+
+    // Pause khi tab bị ẩn, resume khi quay lại
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this._wasPlayingBeforeHidden = this.musicEnabled && !this.music?.paused;
+        this.music?.pause();
+      } else {
+        if (this._wasPlayingBeforeHidden) {
+          this.music?.play().catch(() => {});
+        }
+      }
+    });
   }
 
-  // Gọi sau khi load user data từ Firestore để đồng bộ volume
   applyVolumes(musicVol: number, soundVol: number) {
     this._musicVol = musicVol;
     this._soundVol = soundVol;
@@ -37,7 +50,7 @@ class AudioService {
   }
 
   play(name: SfxName) {
-    if (!this.soundEnabled) return;
+    if (!this.soundEnabled || document.hidden) return;
     const s = this.sfx[name];
     if (!s) return;
     s.currentTime = 0;
@@ -49,6 +62,7 @@ class AudioService {
 
   pauseMusic() {
     this.musicEnabled = false;
+    this._wasPlayingBeforeHidden = false;
     this.music?.pause();
   }
 
@@ -56,7 +70,7 @@ class AudioService {
     this._musicVol = vol;
     if (this.music) this.music.volume = vol;
     this.musicEnabled = vol > 0;
-    if (vol > 0) this.music?.play().catch(() => {});
+    if (vol > 0 && !document.hidden) this.music?.play().catch(() => {});
     else this.music?.pause();
   }
 
@@ -67,7 +81,7 @@ class AudioService {
   }
 
   applySettings(music: boolean, sound: boolean) {
-    if (!music) { this.musicEnabled = false; this.music?.pause(); }
+    if (!music) { this.musicEnabled = false; this._wasPlayingBeforeHidden = false; this.music?.pause(); }
     else { this.musicEnabled = this._musicVol > 0; this.startMusic(); }
     this.soundEnabled = sound && this._soundVol > 0;
   }

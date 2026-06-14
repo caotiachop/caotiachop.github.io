@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "caotiachop",
     "public": "dist",
     "ignore": [
       "firebase.json",
