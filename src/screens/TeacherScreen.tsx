@@ -520,7 +520,7 @@ export function TeacherScreen() {
                   border: '3px solid #FFD600', borderBottom: 'none',
                   padding: '20px 20px 44px',
                   display: 'flex', flexDirection: 'column', gap: 14,
-                  maxHeight: '88vh', overflowY: 'auto' }}>
+                  maxHeight: '95vh', overflowY: 'auto' }}>
 
                 {/* Set form */}
                 {modal === 'set' && (<>
