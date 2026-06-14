@@ -125,13 +125,13 @@ function SettingsOverlay({
   const handleMusic = (v: number) => {
     setMusicVol(v);
     audio.setMusicVolume(v);
-    updateSettings({ music: v > 0 });
+    updateSettings({ music: v > 0, musicVol: v });
   };
 
   const handleSound = (v: number) => {
     setSoundVol(v);
     audio.setSoundVolume(v);
-    updateSettings({ sound: v > 0 });
+    updateSettings({ sound: v > 0, soundVol: v });
   };
 
   const handleLogout = () => {

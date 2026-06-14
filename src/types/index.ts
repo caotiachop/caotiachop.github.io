@@ -5,7 +5,7 @@ export interface User {
   apples: number;
   currentOutfit: string;
   purchasedOutfits: Record<string, boolean>;
-  settings: { music: boolean; sound: boolean };
+  settings: { music: boolean; sound: boolean; musicVol: number; soundVol: number };
   createdAt: string;
 }
 

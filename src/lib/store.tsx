@@ -64,6 +64,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUserProgress(p);
       if (u) {
         setCurrentUser(u.username);
+        audio.applyVolumes(u.settings.musicVol ?? 0.4, u.settings.soundVol ?? 0.7);
         audio.applySettings(u.settings.music, u.settings.sound);
       }
     } finally {
@@ -108,6 +109,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUser(u);
       setScore(s);
       setUserProgress(p);
+      audio.applyVolumes(u.settings.musicVol ?? 0.4, u.settings.soundVol ?? 0.7);
       audio.applySettings(u.settings.music, u.settings.sound);
       return 'ok';
     } catch {
@@ -122,7 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       username: name,
       grade, role: 'student', apples: 0,
       currentOutfit: 'default', purchasedOutfits: { default: true },
-      settings: { music: true, sound: true }, createdAt: now,
+      settings: { music: true, sound: true, musicVol: 0.4, soundVol: 0.7 }, createdAt: now,
     };
     const newScore: Score = {
       maxApples: 0,

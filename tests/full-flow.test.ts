@@ -67,37 +67,21 @@ function helpers(page: Page) {
     await page.waitForTimeout(1000);
   }
 
-  // Trash button của SET: filter grade → tìm nút đỏ [style*="FBE9E7"] đầu tiên
-  async function deleteSetByGradeFilter(grade: number, topic: string) {
-    // Click filter chip "Lớp X" để thu gọn danh sách
-    await page.locator('button', { hasText: `Lớp ${grade}` }).first().click();
-    await page.waitForTimeout(500);
-    // Trash button đầu tiên sau khi filter = trash của topic (vì sort alpha)
-    // Hoặc tìm chính xác hơn: row chứa topic text → trash button
-    const rows = page.locator('div').filter({ has: page.locator('button') });
-    const count = await rows.count();
-    for (let i = 0; i < count; i++) {
-      const row = rows.nth(i);
-      const txt = await row.innerText().catch(() => '');
-      const box = await row.boundingBox();
-      if (txt.includes(topic) && box && box.height < 120) {
-        await row.locator('button').last().click();
-        return;
-      }
-    }
-    // Fallback: click nút đỏ đầu tiên
-    await page.locator('[style*="FBE9E7"]').first().click();
+  // Trash button = nút thứ 2 trước FAB (pattern: [..., pencil, trash, FAB])
+  async function clickSecondToLast() {
+    const btns = page.locator('button');
+    const n    = await btns.count();
+    await btns.nth(n - 2).click();
   }
 
-  // Trash button của QUESTION trong detail view: nút đỏ cuối cùng = câu hỏi mới nhất
-  async function deleteLastQuestion() {
-    const reds = page.locator('[style*="FBE9E7"]');
-    await reds.last().click();
-  }
-
-  // Demote teacher: nút đỏ duy nhất trong teachers tab (không phải của chính mình)
-  async function demoteUser() {
-    await page.locator('[style*="FBE9E7"]').first().click();
+  // Tìm index của navigate button theo text, trash = index + 2
+  async function deleteSetByText(topic: string) {
+    const navBtn = page.locator('button').filter({ hasText: topic }).first();
+    const idx = await navBtn.evaluate(el => {
+      const all = Array.from(document.querySelectorAll('button'));
+      return all.indexOf(el as HTMLButtonElement);
+    });
+    await page.locator('button').nth(idx + 2).click();
   }
 
   // Settings button = button[1] trong header (button[0] = back)
@@ -108,7 +92,7 @@ function helpers(page: Page) {
 
   return {
     shot, typeVirtual, typePin, clickLast, login, gotoTeacher,
-    deleteSetByGradeFilter, deleteLastQuestion, demoteUser, openSettings,
+    clickSecondToLast, deleteSetByText, openSettings,
   };
 }
 
@@ -121,7 +105,11 @@ describe('👩‍🏫 Giáo viên', () => {
   let h   : ReturnType<typeof helpers>;
 
   beforeAll(async () => {
-    browser = await chromium.launch({ headless: false, slowMo: 80 });
+    // Reset Hoc Sinh về student trước khi chạy teacher tests
+    try { execSync('node scripts/reset-student.mjs', { cwd: '/Users/kcoder/caotiachop.github.io', timeout: 15000 }); }
+    catch (e) { console.warn('  [WARN] reset-student:', e); }
+
+    browser = await chromium.launch({ headless: false, slowMo: 80, args: ['--disable-extensions'] });
     ctx  = await browser.newContext();
     page = await ctx.newPage();
     page.on('console', m => { if (m.type() === 'error') console.log('  [ERR]', m.text()); });
@@ -164,8 +152,8 @@ describe('👩‍🏫 Giáo viên', () => {
     await h.shot('03a-created-set');
     expect(await page.locator('body').innerText()).toContain('Auto Test Set');
 
-    // Xóa: filter Lớp 2 → click trash của "Auto Test Set"
-    await h.deleteSetByGradeFilter(2, 'Auto Test Set');
+    // Xóa: tìm navigate button "Auto Test Set" → trash = index+2
+    await h.deleteSetByText('Auto Test Set');
     await page.waitForTimeout(1000);
     await page.locator('button', { hasText: 'Xoá' }).click();
     await page.waitForTimeout(5000);
@@ -187,22 +175,23 @@ describe('👩‍🏫 Giáo viên', () => {
     await page.locator('button').last().click();
     await page.waitForTimeout(2000);
 
-    await page.locator('textarea').fill('Test: 9 + 1 = ?');
+    const qText = `AutoQ${Date.now().toString().slice(-5)}`;
+    await page.locator('textarea').fill(qText);
     await page.locator('input').nth(0).fill('10');
     await page.locator('input').nth(1).fill('11');
     await page.locator('button').filter({ hasText: /^A$/ }).last().click({ force: true });
     await page.locator('button', { hasText: 'Thêm câu hỏi' }).click();
     await page.waitForTimeout(5000);
     await h.shot('04a-added-question');
-    expect(await page.locator('body').innerText()).toContain('Test: 9 + 1 = ?');
+    expect(await page.locator('body').innerText()).toContain(qText);
 
-    // Xóa câu hỏi vừa thêm = nút đỏ cuối cùng trong detail view
-    await h.deleteLastQuestion();
+    // Xóa câu hỏi vừa thêm = second-to-last button (trash, FAB là last)
+    await h.clickSecondToLast();
     await page.waitForTimeout(1000);
     await page.locator('button', { hasText: 'Xoá' }).click();
     await page.waitForTimeout(5000);
     await h.shot('04b-deleted-question');
-    expect(await page.locator('body').innerText()).not.toContain('Test: 9 + 1 = ?');
+    expect(await page.locator('body').innerText()).not.toContain(qText);
   });
 
   test('05 Thêm và xóa quyền giáo viên', async () => {
@@ -219,8 +208,12 @@ describe('👩‍🏫 Giáo viên', () => {
     await h.shot('05a-promoted');
     expect(await page.locator('body').innerText()).toContain('Hoc Sinh');
 
-    // Xóa quyền = nút đỏ đầu tiên (chỉ Hoc Sinh mới có, Giao Vien không có)
-    await h.demoteUser();
+    // Đóng modal nếu đang mở (dùng Escape)
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+
+    // Demote = second-to-last button (UserMinus, FAB là last)
+    await h.clickSecondToLast();
     await page.waitForTimeout(1000);
     await page.locator('button', { hasText: 'Xoá' }).click();
     await page.waitForTimeout(5000);
