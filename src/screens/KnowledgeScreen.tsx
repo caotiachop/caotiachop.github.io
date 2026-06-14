@@ -241,10 +241,10 @@ export function KnowledgeScreen() {
     : Object.entries(sets);
 
   return (
-    <PageWrapper>
+    <PageWrapper scroll={phase === "select"}>
       <div
         style={{
-          minHeight: "100%",
+          ...(phase === "select" ? { minHeight: "100%" } : { height: "100%" }),
           background: "#FFFBEA",
           display: "flex",
           flexDirection: "column",
