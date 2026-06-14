@@ -72,6 +72,7 @@ const ANS_KEYS = ["a", "b", "c", "d"] as const;
 const DEFAULT_MENU: Record<string, { label: string; sub: string }> = {
   speed: { label: "Cáo Tia Chớp", sub: "Toán tốc độ" },
   knowledge: { label: "Cáo Giáo Sư", sub: "Bộ kiến thức" },
+  battle: { label: "Cáo Thách Đấu", sub: "Thi đấu real-time" },
   fashion: { label: "Cáo Thời Trang", sub: "Mua trang phục" },
   leaderboard: { label: "Cáo Thành Tích", sub: "Bảng xếp hạng" },
 };
