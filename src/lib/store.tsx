@@ -1,8 +1,23 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  onAuthStateChanged,
+} from 'firebase/auth';
 import type { User, Score, UserProgress } from '../types';
+import { auth } from './firebase';
 import { api } from './api';
 import { audio } from './audio';
+
+// PIN là 4 số, Firebase Auth yêu cầu tối thiểu 6 ký tự
+const padPin = (pin: string) => pin.padEnd(6, '0');
+const fakeEmail = (name: string) =>
+  `${name.toLowerCase().replace(/\s+/g, '_')}@caotiachop.local`;
 
 interface AppContextType {
   currentUser: string | null;
@@ -27,55 +42,85 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<string | null>(() =>
-    localStorage.getItem('currentUser')
-  );
+  const [uid, setUid] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [score, setScore] = useState<Score | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
-    if (!currentUser) return;
+    const fbUser = auth.currentUser;
+    if (!fbUser) return;
     setLoading(true);
     try {
-      const data = await api.getData();
-      const u = data.users?.[currentUser] ?? null;
+      const [u, s, p] = await Promise.all([
+        api.getUser(fbUser.uid),
+        api.getScore(fbUser.uid),
+        api.getUserProgress(fbUser.uid),
+      ]);
       setUser(u);
-      setScore(data.scores?.[currentUser] ?? null);
-      setUserProgress(data.userProgress?.[currentUser] ?? null);
-      if (u) audio.applySettings(u.settings.music, u.settings.sound);
+      setScore(s);
+      setUserProgress(p);
+      if (u) {
+        setCurrentUser(u.username);
+        audio.applySettings(u.settings.music, u.settings.sound);
+      }
     } finally {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, []);
 
+  // Firebase tự persist session — lắng nghe auth state thay vì dùng localStorage
   useEffect(() => {
-    if (currentUser) refreshUser();
-  }, [currentUser, refreshUser]);
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        setUid(fbUser.uid);
+        await refreshUser();
+      } else {
+        setUid(null);
+        setCurrentUser(null);
+        setUser(null);
+        setScore(null);
+        setUserProgress(null);
+        setLoading(false);
+      }
+    });
+    return unsubscribe;
+  }, [refreshUser]);
 
   const checkUser = async (name: string): Promise<boolean> => {
-    const data = await api.getData();
-    return Boolean(data.users?.[name]);
+    const foundUid = await api.findUidByUsername(name);
+    return foundUid !== null;
   };
 
   const loginUser = async (name: string, pin: string): Promise<'ok' | 'wrong_pin'> => {
-    const data = await api.getData();
-    const u = data.users?.[name];
-    if (!u || u.pin !== pin) return 'wrong_pin';
-    localStorage.setItem('currentUser', name);
-    setCurrentUser(name);
-    setUser(u);
-    setScore(data.scores?.[name] ?? null);
-    setUserProgress(data.userProgress?.[name] ?? null);
-    audio.applySettings(u.settings.music, u.settings.sound);
-    return 'ok';
+    try {
+      const cred = await signInWithEmailAndPassword(auth, fakeEmail(name), padPin(pin));
+      const [u, s, p] = await Promise.all([
+        api.getUser(cred.user.uid),
+        api.getScore(cred.user.uid),
+        api.getUserProgress(cred.user.uid),
+      ]);
+      if (!u) return 'wrong_pin';
+      setUid(cred.user.uid);
+      setCurrentUser(u.username);
+      setUser(u);
+      setScore(s);
+      setUserProgress(p);
+      audio.applySettings(u.settings.music, u.settings.sound);
+      return 'ok';
+    } catch {
+      return 'wrong_pin';
+    }
   };
 
   const registerUser = async (name: string, pin: string, grade: number): Promise<void> => {
+    const cred = await createUserWithEmailAndPassword(auth, fakeEmail(name), padPin(pin));
     const now = new Date().toISOString();
     const newUser: User = {
-      pin, grade, role: 'student', apples: 0,
+      username: name,
+      grade, role: 'student', apples: 0,
       currentOutfit: 'default', purchasedOutfits: { default: true },
       settings: { music: true, sound: true }, createdAt: now,
     };
@@ -85,12 +130,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       fashionCompletedAt: null,
     };
     const newProgress: UserProgress = { completedSetIds: {} };
-    await api.put({
-      users: { [name]: newUser },
-      scores: { [name]: newScore },
-      userProgress: { [name]: newProgress },
-    });
-    localStorage.setItem('currentUser', name);
+    await api.createUserDocs(cred.user.uid, newUser, newScore, newProgress);
+    await api.registerUsername(name, cred.user.uid);
+    setUid(cred.user.uid);
     setCurrentUser(name);
     setUser(newUser);
     setScore(newScore);
@@ -99,7 +141,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('currentUser');
+    void signOut(auth);
+    setUid(null);
     setCurrentUser(null);
     setUser(null);
     setScore(null);
@@ -108,72 +151,72 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updatePin = async (currentPin: string, newPin: string): Promise<'ok' | 'wrong_pin'> => {
-    if (!currentUser || !user) return 'wrong_pin';
-    const data = await api.getData();
-    const stored = data.users?.[currentUser];
-    if (!stored || stored.pin !== currentPin) return 'wrong_pin';
-    setUser({ ...user, pin: newPin });
-    await api.put({ users: { [currentUser]: { pin: newPin } } });
-    return 'ok';
+    const fbUser = auth.currentUser;
+    if (!fbUser || !currentUser) return 'wrong_pin';
+    try {
+      const credential = EmailAuthProvider.credential(fakeEmail(currentUser), padPin(currentPin));
+      await reauthenticateWithCredential(fbUser, credential);
+      await updatePassword(fbUser, padPin(newPin));
+      return 'ok';
+    } catch {
+      return 'wrong_pin';
+    }
   };
 
   const updateSettings = async (s: Partial<User['settings']>) => {
-    if (!currentUser || !user) return;
+    if (!uid || !user) return;
     const next = { ...user.settings, ...s };
     setUser({ ...user, settings: next });
     audio.applySettings(next.music, next.sound);
-    await api.put({ users: { [currentUser]: { settings: next } } });
+    await api.updateUser(uid, { settings: next });
   };
 
   const addApples = async (amount: number) => {
-    if (!currentUser || !user || !score) return;
+    if (!uid || !user || !score) return;
     const newApples = user.apples + amount;
     const newMax = Math.max(score.maxApples, newApples);
     setUser({ ...user, apples: newApples });
     setScore({ ...score, maxApples: newMax });
-    await api.put({
-      users: { [currentUser]: { apples: newApples } },
-      scores: { [currentUser]: { maxApples: newMax } },
-    });
+    await Promise.all([
+      api.updateUser(uid, { apples: newApples }),
+      api.updateScore(uid, { maxApples: newMax }),
+    ]);
   };
 
   const updateOutfit = async (outfit: string) => {
-    if (!currentUser || !user) return;
+    if (!uid || !user) return;
     setUser({ ...user, currentOutfit: outfit });
-    await api.put({ users: { [currentUser]: { currentOutfit: outfit } } });
+    await api.updateUser(uid, { currentOutfit: outfit });
   };
 
   const purchaseOutfit = async (outfit: string, price: number): Promise<boolean> => {
-    if (!currentUser || !user) return false;
+    if (!uid || !user) return false;
     if (user.apples < price) return false;
     const newApples = user.apples - price;
     const newOutfits = { ...user.purchasedOutfits, [outfit]: true };
     const allOwned = Object.keys(newOutfits).length >= 11;
     setUser({ ...user, apples: newApples, purchasedOutfits: newOutfits });
-    const updates: Record<string, unknown> = {
-      users: { [currentUser]: { apples: newApples, purchasedOutfits: newOutfits } },
-    };
+    await api.updateUser(uid, { apples: newApples, purchasedOutfits: newOutfits });
     if (allOwned && score) {
       const now = new Date().toISOString();
       setScore({ ...score, fashionCompletedAt: now });
-      updates.scores = { [currentUser]: { fashionCompletedAt: now } };
+      await api.updateScore(uid, { fashionCompletedAt: now });
     }
-    await api.put(updates);
     return true;
   };
 
   const updateSpeedScore = async (level: number, timeMs: number) => {
-    if (!currentUser || !score) return;
+    if (!uid || !score) return;
     const better = level > score.speedGame.maxLevel ||
       (level === score.speedGame.maxLevel && timeMs < score.speedGame.bestTimeMs);
     if (!better) return;
     const speedGame = { maxLevel: level, bestTimeMs: timeMs };
     setScore({ ...score, speedGame });
-    await api.put({ scores: { [currentUser]: { speedGame } } });
+    await api.updateScore(uid, { speedGame });
   };
 
   const completeKnowledgeSet = async (setId: string, questionCount: number) => {
-    if (!currentUser || !user || !userProgress) return;
+    if (!uid || !user || !userProgress) return;
     const already = userProgress.completedSetIds?.[setId];
     if (!already) {
       const earned = questionCount * 2;
@@ -181,14 +224,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const newMax = Math.max(score?.maxApples ?? 0, newApples);
       setUser({ ...user, apples: newApples });
       setScore(prev => prev ? { ...prev, maxApples: newMax } : prev);
-      await api.put({
-        users: { [currentUser]: { apples: newApples } },
-        scores: { [currentUser]: { maxApples: newMax } },
-      });
+      await Promise.all([
+        api.updateUser(uid, { apples: newApples }),
+        api.updateScore(uid, { maxApples: newMax }),
+      ]);
     }
     const completedSetIds = { ...userProgress.completedSetIds, [setId]: true };
     setUserProgress({ ...userProgress, completedSetIds });
-    await api.put({ userProgress: { [currentUser]: { completedSetIds } } });
+    await api.updateUserProgress(uid, { completedSetIds });
   };
 
   return (

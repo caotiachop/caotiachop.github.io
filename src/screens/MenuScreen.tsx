@@ -23,13 +23,14 @@ const TEACHER_ITEMS = [
 
 export function MenuScreen() {
   const navigate = useNavigate();
-  const { currentUser, user } = useApp();
+  const { currentUser, user, loading: authLoading } = useApp();
   const [menuConfig, setMenuConfig] = useState<Record<string, MenuItemConfig>>({});
 
   useEffect(() => {
-    api.getData().then(d => setMenuConfig(d.menuConfig ?? {})).catch(() => {});
+    api.getMenuConfig().then(cfg => setMenuConfig(cfg)).catch(() => {});
   }, []);
 
+  if (authLoading) return null;
   if (!currentUser) { navigate('/', { replace: true }); return null; }
 
   const MENU_ITEMS = user?.role === 'teacher' ? TEACHER_ITEMS : STUDENT_ITEMS.map(item => {

@@ -1,5 +1,5 @@
 export interface User {
-  pin: string;
+  username: string;
   grade: number;
   role: 'student' | 'teacher';
   apples: number;

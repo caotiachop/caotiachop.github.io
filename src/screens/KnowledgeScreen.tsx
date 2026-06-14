@@ -31,7 +31,7 @@ function shuffle<T>(arr: T[]): T[] {
 
 export function KnowledgeScreen() {
   const navigate = useNavigate();
-  const { currentUser, user, userProgress, completeKnowledgeSet } = useApp();
+  const { currentUser, user, userProgress, completeKnowledgeSet, loading: authLoading } = useApp();
 
   const [phase, setPhase] = useState<KnowPhase>("select");
   const [sets, setSets] = useState<Record<string, KnowledgeSet>>({});
@@ -100,18 +100,15 @@ export function KnowledgeScreen() {
   );
 
   useEffect(() => {
+    if (authLoading) return;
     if (!currentUser) {
       navigate("/", { replace: true });
       return;
     }
-    api
-      .getData()
-      .then((d) => {
-        setSets(d.knowledgeSets ?? {});
-        setLoading(false);
-      })
+    api.getKnowledgeSets()
+      .then(sets => { setSets(sets); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [currentUser, navigate]);
+  }, [currentUser, authLoading, navigate]);
 
   useEffect(() => () => stopTimer(), []);
   useEffect(() => () => stopSpeech(), [stopSpeech]);

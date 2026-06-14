@@ -15,22 +15,25 @@ interface LbUser { name: string; user: User; score: Score }
 
 export function LeaderboardScreen() {
   const navigate = useNavigate();
-  const { currentUser } = useApp();
+  const { currentUser, loading: authLoading } = useApp();
   const [tab, setTab] = useState<Tab>('apples');
   const [data, setData] = useState<LbUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!currentUser) { navigate('/', { replace: true }); return; }
-    api.getData().then(d => {
-      setData(
-        Object.entries(d.users ?? {})
-          .filter(([name, u]) => Boolean(d.scores?.[name]) && u.role !== 'teacher')
-          .map(([name, u]) => ({ name, user: u, score: d.scores![name] }))
-      );
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [currentUser, navigate]);
+    Promise.all([api.getAllUsers(), api.getAllScores()])
+      .then(([users, scores]) => {
+        setData(
+          Object.entries(users)
+            .filter(([uid, u]) => Boolean(scores[uid]) && u.role !== 'teacher')
+            .map(([uid, u]) => ({ name: u.username, user: u, score: scores[uid] }))
+        );
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [currentUser, authLoading, navigate]);
 
   if (!currentUser) return null;
 

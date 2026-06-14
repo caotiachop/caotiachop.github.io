@@ -79,13 +79,13 @@ export function TeacherScreen() {
 
   // ── Load sets on mount ──
   useEffect(() => {
+    if (userLoading) return;
     if (!currentUser) { navigate('/', { replace: true }); return; }
-    if (!userLoading && user && user.role !== 'teacher') { navigate('/menu', { replace: true }); return; }
+    if (user && user.role !== 'teacher') { navigate('/menu', { replace: true }); return; }
     if (!userLoading && user) {
-      api.getData().then(d => {
-        setSets(d.knowledgeSets ?? {});
-        setSetsLoading(false);
-      }).catch(() => setSetsLoading(false));
+      api.getKnowledgeSets()
+        .then(sets => { setSets(sets); setSetsLoading(false); })
+        .catch(() => setSetsLoading(false));
     }
   }, [currentUser, user, userLoading, navigate]);
 
@@ -93,7 +93,8 @@ export function TeacherScreen() {
   useEffect(() => {
     if (topTab !== 'teachers' || Object.keys(allUsers).length > 0) return;
     setUsersLoading(true);
-    api.getData().then(d => { setAllUsers(d.users ?? {}); setUsersLoading(false); })
+    api.getAllUsers()
+      .then(users => { setAllUsers(users); setUsersLoading(false); })
       .catch(() => setUsersLoading(false));
   }, [topTab, allUsers]);
 
@@ -101,16 +102,15 @@ export function TeacherScreen() {
   useEffect(() => {
     if (topTab !== 'menu') return;
     setMenuLoading(true);
-    api.getData().then(d => {
-      const cfg = d.menuConfig ?? {};
-      // Populate draft with current config
-      const draft: Record<string, MenuItemConfig> = {};
-      Object.keys(DEFAULT_MENU).forEach(k => {
-        draft[k] = { label: cfg[k]?.label ?? '', sub: cfg[k]?.sub ?? '' };
-      });
-      setMenuDraft(draft);
-      setMenuLoading(false);
-    }).catch(() => setMenuLoading(false));
+    api.getMenuConfig()
+      .then(cfg => {
+        const draft: Record<string, MenuItemConfig> = {};
+        Object.keys(DEFAULT_MENU).forEach(k => {
+          draft[k] = { label: cfg[k]?.label ?? '', sub: cfg[k]?.sub ?? '' };
+        });
+        setMenuDraft(draft);
+        setMenuLoading(false);
+      }).catch(() => setMenuLoading(false));
   }, [topTab]);
 
   if (!currentUser || !user) return null;
@@ -141,12 +141,12 @@ export function TeacherScreen() {
     setSaving(true);
     try {
       if (editingId) {
-        await api.put({ knowledgeSets: { [editingId]: { grade: setForm.grade, topic: setForm.topic } } });
+        await api.updateKnowledgeSet(editingId, { grade: setForm.grade, topic: setForm.topic });
         setSets(p => ({ ...p, [editingId]: { ...p[editingId], grade: setForm.grade, topic: setForm.topic } }));
       } else {
         const id = `set_${Date.now()}`;
         const s: KnowledgeSet = { grade: setForm.grade, topic: setForm.topic, createdBy: currentUser, questions: {} };
-        await api.put({ knowledgeSets: { [id]: s } });
+        await api.setKnowledgeSet(id, s);
         setSets(p => ({ ...p, [id]: s }));
       }
       setModal('none');
@@ -156,10 +156,9 @@ export function TeacherScreen() {
   const deleteSet = async () => {
     if (saving) return; setSaving(true);
     try {
-      const data = await api.getData();
-      const all = { ...data.knowledgeSets }; delete all[pendingDeleteId];
-      await api.putFull({ ...data, knowledgeSets: all });
-      setSets(all); setModal('none');
+      await api.deleteKnowledgeSet(pendingDeleteId);
+      setSets(p => { const next = { ...p }; delete next[pendingDeleteId]; return next; });
+      setModal('none');
     } finally { setSaving(false); }
   };
 
@@ -182,7 +181,7 @@ export function TeacherScreen() {
       const q: Question = { question: qForm.text, difficulty: qForm.difficulty,
         answers: { a: qForm.a, b: qForm.b, c: qForm.c, d: qForm.d }, correctKey: qForm.correct };
       const id = editingId ?? `q_${Date.now()}`;
-      await api.put({ knowledgeSets: { [selectedSetId]: { questions: { [id]: q } } } });
+      await api.setQuestion(selectedSetId, id, q);
       setSets(p => ({ ...p, [selectedSetId]: { ...p[selectedSetId],
         questions: { ...p[selectedSetId].questions, [id]: q } } }));
       setModal('none');
@@ -192,11 +191,11 @@ export function TeacherScreen() {
   const deleteQuestion = async () => {
     if (saving) return; setSaving(true);
     try {
-      const data = await api.getData();
-      const qs = { ...data.knowledgeSets[selectedSetId].questions }; delete qs[pendingDeleteId];
-      const updatedSets = { ...data.knowledgeSets, [selectedSetId]: { ...data.knowledgeSets[selectedSetId], questions: qs } };
-      await api.putFull({ ...data, knowledgeSets: updatedSets });
-      setSets(p => ({ ...p, [selectedSetId]: { ...p[selectedSetId], questions: qs } }));
+      await api.deleteQuestion(selectedSetId, pendingDeleteId);
+      setSets(p => {
+        const qs = { ...p[selectedSetId].questions }; delete qs[pendingDeleteId];
+        return { ...p, [selectedSetId]: { ...p[selectedSetId], questions: qs } };
+      });
       setModal('none');
     } finally { setSaving(false); }
   };
@@ -207,20 +206,22 @@ export function TeacherScreen() {
   const promoteTeacher = async () => {
     const name = newTeacherName.trim();
     if (!name || saving) return;
-    if (!allUsers[name]) { setTeacherMsg('Không tìm thấy người dùng này.'); return; }
-    if (allUsers[name].role === 'teacher') { setTeacherMsg('Người này đã là giáo viên.'); return; }
+    const entry = Object.entries(allUsers).find(([, u]) => u.username === name);
+    if (!entry) { setTeacherMsg('Không tìm thấy người dùng này.'); return; }
+    const [targetUid, targetUser] = entry;
+    if (targetUser.role === 'teacher') { setTeacherMsg('Người này đã là giáo viên.'); return; }
     setSaving(true);
     try {
-      await api.put({ users: { [name]: { role: 'teacher' } } });
-      setAllUsers(p => ({ ...p, [name]: { ...p[name], role: 'teacher' } }));
+      await api.updateUser(targetUid, { role: 'teacher' });
+      setAllUsers(p => ({ ...p, [targetUid]: { ...p[targetUid], role: 'teacher' } }));
       setNewTeacherName(''); setModal('none'); setTeacherMsg('');
     } finally { setSaving(false); }
   };
-  const confirmDelTeacher = (name: string) => { setPDI(name); setModal('del-teacher'); };
+  const confirmDelTeacher = (uid: string) => { setPDI(uid); setModal('del-teacher'); };
   const demoteTeacher = async () => {
     if (saving) return; setSaving(true);
     try {
-      await api.put({ users: { [pendingDeleteId]: { role: 'student' } } });
+      await api.updateUser(pendingDeleteId, { role: 'student' });
       setAllUsers(p => ({ ...p, [pendingDeleteId]: { ...p[pendingDeleteId], role: 'student' } }));
       setModal('none');
     } finally { setSaving(false); }
@@ -232,7 +233,7 @@ export function TeacherScreen() {
   const saveMenuConfig = async () => {
     if (saving) return; setSaving(true);
     try {
-      await api.put({ menuConfig: menuDraft });
+      await api.updateMenuConfig(menuDraft);
       setMenuSaved(true); setTimeout(() => setMenuSaved(false), 2000);
     } finally { setSaving(false); }
   };
@@ -403,27 +404,27 @@ export function TeacherScreen() {
               style={{ flex: 1, overflowY: 'auto' }}>
               <div style={{ padding: '12px 16px 100px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {usersLoading ? <LoadMsg msg="Đang tải..." /> : teachers.length === 0 ? <LoadMsg msg="Chưa có giáo viên nào." /> :
-                 teachers.map(([name, u], i) => (
-                  <motion.div key={name} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
+                 teachers.map(([uid, u], i) => (
+                  <motion.div key={uid} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.05 }}
                     style={{ display: 'flex', alignItems: 'center', gap: 12,
-                      background: name === currentUser ? '#FFF3A3' : '#FFF',
-                      border: `2px solid ${name === currentUser ? '#FFD600' : '#E0E0E0'}`,
+                      background: u.username === currentUser ? '#FFF3A3' : '#FFF',
+                      border: `2px solid ${u.username === currentUser ? '#FFD600' : '#E0E0E0'}`,
                       borderRadius: 14, padding: '12px 14px', boxShadow: '0 2px 0 #F5A800' }}>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#FFD600',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 18, fontWeight: 800, color: '#3E2000', flexShrink: 0 }}>
-                      {name[0]?.toUpperCase()}
+                      {u.username[0]?.toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 15, fontWeight: 800, color: '#3E2000' }}>
-                        {name}{name === currentUser && <span style={{ fontSize: 12, color: '#F5A800' }}> (Bạn)</span>}
+                        {u.username}{u.username === currentUser && <span style={{ fontSize: 12, color: '#F5A800' }}> (Bạn)</span>}
                       </div>
                       <div style={{ fontSize: 12, color: '#7D5A2C' }}>Lớp {u.grade} • Giáo viên</div>
                     </div>
-                    {name !== currentUser && (
+                    {u.username !== currentUser && (
                       <IconBtn icon={UserMinus} color="#FF5722" bg="#FBE9E7"
-                        onClick={() => { audio.play('button-click'); confirmDelTeacher(name); }} />
+                        onClick={() => { audio.play('button-click'); confirmDelTeacher(uid); }} />
                     )}
                   </motion.div>
                 ))}
@@ -615,7 +616,7 @@ export function TeacherScreen() {
                 {/* Confirm demote teacher */}
                 {modal === 'del-teacher' && (
                   <ConfirmDelete
-                    message={`Xoá quyền giáo viên của "${pendingDeleteId}"? Họ sẽ trở thành học sinh.`}
+                    message={`Xoá quyền giáo viên của "${allUsers[pendingDeleteId]?.username ?? pendingDeleteId}"? Họ sẽ trở thành học sinh.`}
                     onConfirm={demoteTeacher} onCancel={closeModal} saving={saving} />
                 )}
               </motion.div>
