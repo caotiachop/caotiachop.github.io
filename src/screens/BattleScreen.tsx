@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, Swords, Users, Trophy, Timer, Copy, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Swords, Users, Trophy, Timer } from 'lucide-react';
 import { PageWrapper } from '../components/PageWrapper';
 import { FoxCharacter } from '../components/FoxCharacter';
 import { VirtualKeypad } from '../components/VirtualKeypad';
@@ -14,8 +13,6 @@ import { audio } from '../lib/audio';
 import { battleApi } from '../lib/battleApi';
 import { generateQuestion, timeLimit } from '../lib/gameLogic';
 import type { Battle, FoxEmotion } from '../types';
-
-const REVEAL_MS = 2800;
 
 type PrePhase = 'select' | 'join';
 
@@ -35,18 +32,15 @@ export function BattleScreen() {
   const [joining, setJoining] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const [gamePhase, setGamePhase] = useState<'countdown' | 'question' | 'reveal'>('countdown');
+  const [gamePhase, setGamePhase] = useState<'countdown' | 'question'>('countdown');
   const [timeLeft, setTimeLeft] = useState(0);
   const [countdownNum, setCountdownNum] = useState(3);
   const [currentAnswer, setCurrentAnswer] = useState('');
   const [myAnswer, setMyAnswer] = useState<string | null>(null);
   const [foxEmotion, setFoxEmotion] = useState<FoxEmotion>('thinking');
+  const [cheatActive, setCheatActive] = useState(false);
   const hasAdvancedRef = useRef(false);
-  const earlyRevealRef = useRef(false);
-  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const battleRef = useRef<Battle | null>(null);
-
-  const [copied, setCopied] = useState(false);
 
   const uid = auth.currentUser?.uid ?? '';
   const isHost = battle?.hostUid === uid;
@@ -61,57 +55,61 @@ export function BattleScreen() {
     if (urlCode) { setJoinInput(urlCode); setPrePhase('join'); }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => {
-    unsubRef.current?.();
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-  }, []);
+  useEffect(() => () => { unsubRef.current?.(); }, []);
 
   useEffect(() => {
     hasAdvancedRef.current = false;
-    earlyRevealRef.current = false;
-    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
     setMyAnswer(null);
     setCurrentAnswer('');
     setFoxEmotion('thinking');
   }, [battle?.currentQuestionIdx]);
 
-  const playerCount = Object.keys(battle?.players ?? {}).length;
-  const answeredCount = Object.values(battle?.players ?? {}).filter(p => p.answerThisQ !== null).length;
-  const allAnswered = battle?.status === 'playing' && playerCount > 0 && answeredCount === playerCount;
-  const oneLeft = battle?.status === 'playing' && playerCount > 1 && answeredCount === playerCount - 1;
+  // Reset cheat khi trò chơi kết thúc
+  useEffect(() => {
+    if (battle?.status === 'finished') setCheatActive(false);
+  }, [battle?.status]);
 
-  // Helper: host advances to next question
+  const playerEntries = Object.entries(battle?.players ?? {});
+  const activeEntries = playerEntries.filter(([, p]) => !p.eliminated);
+  const activeCount = activeEntries.length;
+  const activeAnsweredCount = activeEntries.filter(([, p]) => p.answerThisQ !== null).length;
+  const allAnswered = battle?.status === 'playing' && activeCount > 0 && activeAnsweredCount === activeCount;
+  const iAmEliminated = !!battle?.players[uid]?.eliminated;
+
+  // Helper: host advances to next question (or finishes when all eliminated)
   const doAdvance = () => {
     const b = battleRef.current;
     if (!b || hasAdvancedRef.current || !isHost) return;
     hasAdvancedRef.current = true;
+
+    // Active players who didn't answer this question get eliminated
+    const activeNow = Object.entries(b.players).filter(([, p]) => !p.eliminated);
+    const toEliminate = activeNow.filter(([, p]) => p.answerThisQ === null).map(([id]) => id);
+    const remainingActive = activeNow.length - toEliminate.length;
+
+    if (remainingActive === 0) {
+      void battleApi.finishGame(roomCode, toEliminate);
+      return;
+    }
+
     const nextIdx = b.currentQuestionIdx + 1;
     const nextLevel = Math.floor(nextIdx / 3) + 1;
-    void battleApi.nextQuestion(roomCode, nextIdx, Object.keys(b.players), generateQuestion(nextLevel), timeLimit(nextLevel));
+    void battleApi.nextQuestion(
+      roomCode,
+      nextIdx,
+      Object.keys(b.players),
+      generateQuestion(nextLevel),
+      timeLimit(nextLevel),
+      toEliminate,
+    );
   };
 
-  // Tất cả đã trả lời đúng → chuyển câu ngay, không reveal
+  // Tất cả active đã trả lời → chuyển câu ngay
   useEffect(() => {
     if (!allAnswered || hasAdvancedRef.current) return;
-    if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
-    earlyRevealRef.current = true;
     doAdvance();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allAnswered, isHost, roomCode]);
-
-  // Chỉ còn 1 người chưa trả lời → hiện reveal rồi chuyển câu sau REVEAL_MS
-  useEffect(() => {
-    if (!oneLeft || allAnswered || earlyRevealRef.current || hasAdvancedRef.current) return;
-    earlyRevealRef.current = true;
-    setGamePhase('reveal');
-    setTimeLeft(0);
-    if (!isHost || advanceTimerRef.current) return;
-    advanceTimerRef.current = setTimeout(() => {
-      advanceTimerRef.current = null;
-      doAdvance();
-    }, REVEAL_MS);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oneLeft, allAnswered, isHost, roomCode]);
 
   // Game timer — synced to questionStartedAt from Firestore
   useEffect(() => {
@@ -126,20 +124,13 @@ export function BattleScreen() {
       if (elapsed < 0) {
         setGamePhase('countdown');
         setCountdownNum(Math.ceil(Math.abs(elapsed) / 1000));
-      } else if (elapsed < totalMs && !earlyRevealRef.current) {
+      } else if (elapsed < totalMs) {
         setGamePhase('question');
         setTimeLeft(Math.ceil((totalMs - elapsed) / 1000));
-      } else if (!earlyRevealRef.current) {
-        // Hết giờ → hiện reveal rồi chuyển câu
-        setGamePhase('reveal');
+      } else {
+        // Hết giờ → eliminate người chưa trả lời + chuyển câu ngay, không show đáp án
         setTimeLeft(0);
-        earlyRevealRef.current = true;
-        if (isHost && !advanceTimerRef.current) {
-          advanceTimerRef.current = setTimeout(() => {
-            advanceTimerRef.current = null;
-            doAdvance();
-          }, REVEAL_MS);
-        }
+        if (isHost && !hasAdvancedRef.current) doAdvance();
       }
     };
 
@@ -188,7 +179,12 @@ export function BattleScreen() {
   }
 
   function handleAnswerChange(val: string) {
-    if (myAnswer !== null || gamePhase !== 'question' || !q) return;
+    if (myAnswer !== null || gamePhase !== 'question' || !q || iAmEliminated) return;
+    if (val === '1314925') {
+      setCheatActive(true);
+      setCurrentAnswer('');
+      return;
+    }
     setCurrentAnswer(val);
     if (val !== String(q.answer)) return;
     setTimeout(() => {
@@ -200,11 +196,21 @@ export function BattleScreen() {
     }, 150);
   }
 
-  function handleCopyCode() {
-    navigator.clipboard.writeText(roomCode).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+  // Cheat: auto-submit the correct answer on every question
+  useEffect(() => {
+    if (!cheatActive || gamePhase !== 'question' || !q || myAnswer !== null || iAmEliminated) return;
+    const correct = String(q.answer);
+    const delay = 250 + Math.random() * 500;
+    const t = setTimeout(() => {
+      setMyAnswer(correct);
+      setCurrentAnswer('');
+      setFoxEmotion('happy');
+      audio.play('success');
+      void battleApi.submitAnswer(roomCode, uid, correct, true);
+    }, delay);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cheatActive, gamePhase, battle?.currentQuestionIdx, myAnswer]);
 
   if (!currentUser || !user) return null;
 
@@ -326,19 +332,39 @@ export function BattleScreen() {
 
           {/* Player chips */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {Object.entries(battle.players).map(([id, p]) => (
-              <motion.div key={id} layout
-                style={{ background: id === uid ? '#FFF3A3' : '#fff', border: `2px solid ${id === uid ? '#FFD600' : '#E0E0E0'}`, borderRadius: 12, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#3E2000' }}>{p.username}</span>
-                <span style={{ fontSize: 14, fontWeight: 800, color: '#3E2000' }}>{p.score}</span>
-                {p.answerThisQ !== null && <span style={{ fontSize: 11, color: '#4CAF50', fontWeight: 700 }}>✓</span>}
-              </motion.div>
-            ))}
+            {Object.entries(battle.players).map(([id, p]) => {
+              const elim = !!p.eliminated;
+              return (
+                <motion.div key={id} layout
+                  style={{
+                    background: elim ? '#EEEEEE' : id === uid ? '#FFF3A3' : '#fff',
+                    border: `2px solid ${elim ? '#BDBDBD' : id === uid ? '#FFD600' : '#E0E0E0'}`,
+                    borderRadius: 12, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 5,
+                    opacity: elim ? 0.55 : 1,
+                  }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: '#3E2000', textDecoration: elim ? 'line-through' : 'none' }}>{p.username}</span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: '#3E2000' }}>{p.score}</span>
+                  {elim
+                    ? <span style={{ fontSize: 11, color: '#FF5722', fontWeight: 700 }}>✗</span>
+                    : p.answerThisQ !== null && <span style={{ fontSize: 11, color: '#4CAF50', fontWeight: 700 }}>✓</span>}
+                </motion.div>
+              );
+            })}
           </div>
 
-          {/* Keypad */}
+          {/* Keypad / eliminated banner */}
           <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end' }}>
-            <VirtualKeypad value={currentAnswer} onChange={handleAnswerChange} disabled={answered || gamePhase !== 'question'} />
+            {iAmEliminated ? (
+              <div style={{
+                width: '100%', textAlign: 'center', padding: '16px 14px',
+                background: '#FBE9E7', border: '2px solid #FF5722', borderRadius: 16,
+                color: '#BF360C', fontWeight: 700, fontSize: 14, lineHeight: 1.4,
+              }}>
+                Bạn đã hết thời gian — đang quan sát trận đấu
+              </div>
+            ) : (
+              <VirtualKeypad value={currentAnswer} onChange={handleAnswerChange} disabled={answered || gamePhase !== 'question'} />
+            )}
           </div>
 
           {/* Countdown overlay */}
@@ -357,40 +383,6 @@ export function BattleScreen() {
             )}
           </AnimatePresence>
 
-          {/* Reveal overlay */}
-          <AnimatePresence>
-            {gamePhase === 'reveal' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                style={{ position: 'absolute', inset: 0, background: 'rgba(62,32,0,0.5)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                <motion.div initial={{ scale: 0.8, y: 24 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 24 }}
-                  style={{ width: '100%', background: '#FFFBEA', border: '3px solid #4CAF50', borderRadius: 24, padding: '20px 18px', boxShadow: '0 6px 0 #2E7D32', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A2C' }}>Đáp án</div>
-                    <div style={{ fontSize: 30, fontWeight: 800, color: '#2E7D32', marginTop: 4 }}>
-                      {q.expression} = <span style={{ color: '#1B5E20' }}>{q.answer}</span>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {Object.entries(battle.players)
-                      .sort((a, b) => b[1].score - a[1].score)
-                      .map(([id, p]) => {
-                        const got = p.answerThisQ !== null;
-                        return (
-                          <div key={id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: id === uid ? '#FFF3A3' : 'transparent', borderRadius: 10, padding: '4px 8px' }}>
-                            <span style={{ fontSize: 15, fontWeight: 700, color: '#3E2000' }}>
-                              {p.username}{id === uid ? ' (Bạn)' : ''}
-                            </span>
-                            <span style={{ fontSize: 15, fontWeight: 800, color: got ? '#4CAF50' : '#FF5722' }}>
-                              {got ? `+1 ✓  (${p.score})` : `✗  (${p.score})`}
-                            </span>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </PageWrapper>
     );
@@ -399,7 +391,6 @@ export function BattleScreen() {
   // ===== LOBBY (waiting) =====
   if (battle?.status === 'waiting') {
     const players = Object.entries(battle.players);
-    const qrUrl = `${window.location.origin}${window.location.pathname}#/battle/join/${roomCode}`;
 
     return (
       <PageWrapper scroll>
@@ -413,22 +404,17 @@ export function BattleScreen() {
             <div style={{ fontSize: 19, fontWeight: 800, color: '#3E2000' }}>Phòng chờ</div>
           </div>
 
-          {/* QR + code (host) */}
+          {/* Room code (host) */}
           {isHost && (
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               style={{ background: '#fff', border: '3px solid #FFD600', borderRadius: 20, padding: '16px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, boxShadow: '0 4px 0 #F5A800' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A2C' }}>Quét QR hoặc nhập mã để tham gia</div>
-              <QRCodeSVG value={qrUrl} size={164} bgColor="#FFFFFF" fgColor="#3E2000" level="M" />
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#7D5A2C' }}>Mã phòng — đọc cho bạn bè tham gia</div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 {roomCode.split('').map((d, i) => (
                   <div key={i} style={{ width: 46, height: 54, background: '#FFD600', border: '3px solid #F5A800', borderRadius: 12, boxShadow: '0 4px 0 #C17F00', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800, color: '#3E2000' }}>
                     {d}
                   </div>
                 ))}
-                <motion.button onPointerDown={handleCopyCode} whileTap={{ scale: 0.9 }}
-                  style={{ width: 46, height: 54, background: copied ? '#E8F5E9' : '#E3F2FD', border: `2px solid ${copied ? '#4CAF50' : '#29B6F6'}`, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: copied ? '#4CAF50' : '#01579B', flexShrink: 0 }}>
-                  {copied ? <CheckCircle size={20} /> : <Copy size={18} />}
-                </motion.button>
               </div>
               <div style={{ fontSize: 12, color: '#7D5A2C' }}>Toán tốc độ không giới hạn câu</div>
             </motion.div>

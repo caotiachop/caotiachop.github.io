@@ -25,15 +25,16 @@ import { audio } from "../lib/audio";
 import { generateQuestion, timeLimit, requiredCorrect } from "../lib/gameLogic";
 import type { FoxEmotion, Score } from "../types";
 
-type Phase = "countdown" | "playing" | "paused" | "gameover";
+type Phase = "select" | "countdown" | "playing" | "paused" | "gameover";
 
 export function SpeedGameScreen() {
   const navigate = useNavigate();
-  const { currentUser, user, addApples, updateSpeedScore } = useApp();
+  const { currentUser, user, score, addApples, updateSpeedScore } = useApp();
 
-  const [phase, setPhase] = useState<Phase>("countdown");
+  const [phase, setPhase] = useState<Phase>("select");
   const [countdown, setCountdown] = useState(3);
   const [level, setLevel] = useState(1);
+  const [startLevel, setStartLevel] = useState(1);
   const [correctStreak, setCorrectStreak] = useState(0);
   const [question, setQuestion] = useState(() => generateQuestion(1));
   const [answer, setAnswer] = useState("");
@@ -98,7 +99,7 @@ export function SpeedGameScreen() {
       if (c <= 0) {
         clearInterval(iv);
         setPhase("playing");
-        startQuestion(1);
+        startQuestion(levelRef.current);
       }
     }, 1000);
     return () => clearInterval(iv);
@@ -184,11 +185,22 @@ export function SpeedGameScreen() {
     ],
   );
 
+  const startFromLevel = (lvl: number) => {
+    stopTimer();
+    setStartLevel(lvl);
+    setLevel(lvl);
+    setCorrectStreak(0);
+    setFoxEmotion("normal");
+    setBestTimeMs(0);
+    setCountdown(3);
+    setPhase("countdown");
+  };
+
   const handleRestart = () => {
     stopTimer();
-    setPhase("countdown");
-    setCountdown(3);
+    setPhase("select");
     setLevel(1);
+    setStartLevel(1);
     setCorrectStreak(0);
     setFoxEmotion("normal");
     setBestTimeMs(0);
@@ -196,6 +208,7 @@ export function SpeedGameScreen() {
 
   const handleContinue = async () => {
     if (!user) return;
+    if (startLevel !== 1) return;
     const cost = level * 2;
     if (user.apples < cost) return;
     await addApples(-cost);
@@ -209,7 +222,10 @@ export function SpeedGameScreen() {
   const timerColor =
     timerPct > 50 ? "#4CAF50" : timerPct > 25 ? "#FF8800" : "#FF5722";
   const needed = requiredCorrect(level);
-  const canContinue = user && user.apples >= level * 2;
+  const canContinue = startLevel === 1 && user && user.apples >= level * 2;
+  const maxLevelReached = score?.speedGame?.maxLevel ?? 0;
+  const milestones: number[] = [];
+  for (let m = 10; m <= maxLevelReached; m += 10) milestones.push(m);
 
   return (
     <PageWrapper>
@@ -394,6 +410,162 @@ export function SpeedGameScreen() {
             disabled={phase !== "playing"}
           />
         </div>
+
+        {/* Select overlay — pick start point */}
+        <AnimatePresence>
+          {phase === "select" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "#FFFBEA",
+                display: "flex",
+                flexDirection: "column",
+                padding: "20px 18px 24px",
+                gap: 14,
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <motion.button
+                  onPointerDown={() => {
+                    audio.play("button-back");
+                    navigate("/menu");
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    background: "#FFD600",
+                    border: "2px solid #F5A800",
+                    boxShadow: "0 3px 0 #C17F00",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#3E2000",
+                  }}
+                >
+                  <Home size={20} />
+                </motion.button>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#3E2000" }}>
+                  Cáo Tia Chớp
+                </div>
+                <div style={{ width: 40 }} />
+              </div>
+
+              <motion.button
+                onPointerDown={() => {
+                  audio.play("button-click");
+                  startFromLevel(1);
+                }}
+                whileTap={{ y: 4, boxShadow: "none" }}
+                style={{
+                  background: "#FFD600",
+                  border: "3px solid #F5A800",
+                  boxShadow: "0 5px 0 #C17F00",
+                  borderRadius: 18,
+                  padding: "18px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  fontFamily: "'Baloo 2', cursive",
+                  textAlign: "left",
+                }}
+              >
+                <FoxCharacter
+                  outfit={user?.currentOutfit ?? "default"}
+                  emotion="happy"
+                  width={56}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: "#3E2000" }}>
+                    Chơi từ đầu
+                  </div>
+                  <div style={{ fontSize: 12, color: "#7D5A2C" }}>
+                    Bắt đầu Level 1 • có thể dùng táo để chơi tiếp
+                  </div>
+                </div>
+                <Play size={22} color="#3E2000" />
+              </motion.button>
+
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#7D5A2C",
+                  marginTop: 4,
+                }}
+              >
+                Cột mốc đã đạt {milestones.length > 0 && `(chỉ chơi 1 lần)`}
+              </div>
+              {milestones.length === 0 ? (
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "#7D5A2C",
+                    background: "#FFF",
+                    border: "2px dashed #FFD600",
+                    borderRadius: 14,
+                    padding: "14px 16px",
+                    textAlign: "center",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Vượt qua Level 10 để mở cột mốc đầu tiên!
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 10,
+                  }}
+                >
+                  {milestones.map((m) => (
+                    <motion.button
+                      key={m}
+                      onPointerDown={() => {
+                        audio.play("button-click");
+                        startFromLevel(m);
+                      }}
+                      whileTap={{ y: 3, boxShadow: "none" }}
+                      style={{
+                        background: "#FFF",
+                        border: "2px solid #FFD600",
+                        boxShadow: "0 3px 0 #F5A800",
+                        borderRadius: 14,
+                        padding: "12px 8px",
+                        fontFamily: "'Baloo 2', cursive",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 2,
+                      }}
+                    >
+                      <div style={{ fontSize: 11, color: "#7D5A2C", fontWeight: 700 }}>
+                        LEVEL
+                      </div>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: "#3E2000", lineHeight: 1 }}>
+                        {m}
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Countdown overlay — fully opaque, nothing shown underneath */}
         <AnimatePresence>
@@ -626,22 +798,24 @@ export function SpeedGameScreen() {
                 shadow="#C17F00"
                 onClick={handleRestart}
               >
-                <RotateCcw size={18} /> Chơi lại từ đầu
+                <RotateCcw size={18} /> Chơi lại
               </ModalBtn>
-              <ModalBtn
-                color={canContinue ? "#E8F5E9" : "#F5F5F5"}
-                shadow={canContinue ? "#4CAF50" : "#BDBDBD"}
-                onClick={canContinue ? handleContinue : undefined}
-              >
-                <Play size={18} /> Chơi tiếp ({level * 2}{" "}
-                <img
-                  src="/assets/apple.webp"
-                  width={20}
-                  alt="táo"
-                  style={{ verticalAlign: "middle", marginLeft: -8, marginRight: -10, marginBottom: 5, zoom: 1.2 }}
-                />
-                )
-              </ModalBtn>
+              {startLevel === 1 && (
+                <ModalBtn
+                  color={canContinue ? "#E8F5E9" : "#F5F5F5"}
+                  shadow={canContinue ? "#4CAF50" : "#BDBDBD"}
+                  onClick={canContinue ? handleContinue : undefined}
+                >
+                  <Play size={18} /> Chơi tiếp ({level * 2}{" "}
+                  <img
+                    src="/assets/apple.webp"
+                    width={20}
+                    alt="táo"
+                    style={{ verticalAlign: "middle", marginLeft: -8, marginRight: -10, marginBottom: 5, zoom: 1.2 }}
+                  />
+                  )
+                </ModalBtn>
+              )}
               <ModalBtn
                 color="#E3F2FD"
                 shadow="#29B6F6"

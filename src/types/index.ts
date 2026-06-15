@@ -54,6 +54,7 @@ export interface BattlePlayer {
   score: number;
   answerThisQ: string | null;
   joinedAt: string;
+  eliminated?: boolean;
 }
 
 export interface BattleQuestion {

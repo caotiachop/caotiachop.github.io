@@ -16,8 +16,19 @@ import { audio } from './audio';
 
 // PIN là 4 số, Firebase Auth yêu cầu tối thiểu 6 ký tự
 const padPin = (pin: string) => pin.padEnd(6, '0');
-const fakeEmail = (name: string) =>
-  `${name.toLowerCase().replace(/\s+/g, '_')}@caotiachop.local`;
+const slugUsername = (name: string) => name.toLowerCase().replace(/\s+/g, '_');
+// Legacy: tài khoản cũ dùng email deterministic theo username
+const legacyEmail = (name: string) => `${slugUsername(name)}@caotiachop.local`;
+// Tài khoản mới dùng email kèm random suffix để re-register sau xoá vẫn được
+const newAuthEmail = (name: string) => {
+  const rand = Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+  return `${slugUsername(name)}_${rand}@caotiachop.local`;
+};
+// Resolve auth email: nếu /usernames có authEmail thì dùng, không thì fallback legacy
+async function resolveAuthEmail(name: string): Promise<string> {
+  const mapping = await api.findUsernameMapping(name);
+  return mapping?.authEmail ?? legacyEmail(name);
+}
 
 interface AppContextType {
   currentUser: string | null;
@@ -97,7 +108,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const loginUser = async (name: string, pin: string): Promise<'ok' | 'wrong_pin'> => {
     try {
-      const cred = await signInWithEmailAndPassword(auth, fakeEmail(name), padPin(pin));
+      const email = await resolveAuthEmail(name);
+      const cred = await signInWithEmailAndPassword(auth, email, padPin(pin));
       const [u, s, p] = await Promise.all([
         api.getUser(cred.user.uid),
         api.getScore(cred.user.uid),
@@ -118,7 +130,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const registerUser = async (name: string, pin: string, grade: number): Promise<void> => {
-    const cred = await createUserWithEmailAndPassword(auth, fakeEmail(name), padPin(pin));
+    const authEmail = newAuthEmail(name);
+    const cred = await createUserWithEmailAndPassword(auth, authEmail, padPin(pin));
     const now = new Date().toISOString();
     const newUser: User = {
       username: name,
@@ -133,7 +146,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     const newProgress: UserProgress = { completedSetIds: {} };
     await api.createUserDocs(cred.user.uid, newUser, newScore, newProgress);
-    await api.registerUsername(name, cred.user.uid);
+    await api.registerUsername(name, cred.user.uid, authEmail);
     setUid(cred.user.uid);
     setCurrentUser(name);
     setUser(newUser);
@@ -156,7 +169,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const fbUser = auth.currentUser;
     if (!fbUser || !currentUser) return 'wrong_pin';
     try {
-      const credential = EmailAuthProvider.credential(fakeEmail(currentUser), padPin(currentPin));
+      const email = await resolveAuthEmail(currentUser);
+      const credential = EmailAuthProvider.credential(email, padPin(currentPin));
       await reauthenticateWithCredential(fbUser, credential);
       await updatePassword(fbUser, padPin(newPin));
       return 'ok';

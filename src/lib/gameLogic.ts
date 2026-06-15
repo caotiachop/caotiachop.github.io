@@ -25,6 +25,23 @@ function randInt(min: number, max: number): number {
 
 export function generateQuestion(level: number): { expression: string; answer: number } {
   const max = maxAnswer(level);
+
+  // Level 100+: 40% chance to produce a single × or ÷ question with integer answer.
+  if (level >= 100 && Math.random() < 0.4) {
+    if (Math.random() < 0.5) {
+      const a = randInt(2, 9);
+      const bMax = Math.max(2, Math.min(99, Math.floor(max / Math.max(a, 1))));
+      const b = randInt(2, bMax);
+      return { expression: `${a} × ${b}`, answer: a * b };
+    } else {
+      const b = randInt(2, 9);
+      const resultMax = Math.max(2, Math.min(999, Math.floor(max / b)));
+      const result = randInt(2, resultMax);
+      const a = b * result;
+      return { expression: `${a} ÷ ${b}`, answer: result };
+    }
+  }
+
   const numCount = level <= 5 ? 2 : level <= 15 ? 3 : randInt(3, 4);
   const perNum = Math.max(1, Math.floor(max / numCount));
 

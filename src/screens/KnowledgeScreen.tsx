@@ -2,11 +2,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  AlertTriangle,
   BookOpen,
   CheckCircle2,
+  Pencil,
   Timer,
+  Trash2,
   Volume2,
   VolumeX,
+  X,
 } from "lucide-react";
 import { SettingsButton } from "../components/Settings";
 import { Confetti } from "../components/Confetti";
@@ -21,9 +25,26 @@ import { audio } from "../lib/audio";
 import type { KnowledgeSet, Question, FoxEmotion } from "../types";
 
 type KnowPhase = "select" | "playing" | "complete";
+type TeacherModal = "none" | "edit" | "del";
+
+interface QForm {
+  text: string;
+  difficulty: "easy" | "medium" | "hard";
+  a: string;
+  b: string;
+  c: string;
+  d: string;
+  correct: "a" | "b" | "c" | "d";
+}
 
 const DIFF_TIME: Record<string, number> = { easy: 300, medium: 420, hard: 600 };
+const DIFF_META = {
+  easy: { label: "Dễ", color: "#4CAF50", bg: "#E8F5E9" },
+  medium: { label: "Trung bình", color: "#FF8800", bg: "#FFF3E0" },
+  hard: { label: "Khó", color: "#FF5722", bg: "#FBE9E7" },
+} as const;
 const LETTERS = ["A", "B", "C", "D", "E", "F"];
+const ANS_KEYS = ["a", "b", "c", "d"] as const;
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
@@ -57,6 +78,20 @@ export function KnowledgeScreen() {
   const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
   // null=im lặng | 'question'=đọc câu hỏi | number=đọc đáp án thứ n (theo shuffledAnswers)
   const [speakingItem, setSpeakingItem] = useState<"question" | number | null>(null);
+
+  // Teacher edit/delete modal state
+  const isTeacher = user?.role === "teacher";
+  const [teacherModal, setTeacherModal] = useState<TeacherModal>("none");
+  const [qForm, setQForm] = useState<QForm>({
+    text: "",
+    difficulty: "easy",
+    a: "",
+    b: "",
+    c: "",
+    d: "",
+    correct: "a",
+  });
+  const [savingQ, setSavingQ] = useState(false);
 
   const stopTimer = () => {
     if (timerRef.current) {
@@ -153,10 +188,11 @@ export function KnowledgeScreen() {
     }, 1000);
   };
 
-  const nextQuestion = (idx: number) => {
+  const nextQuestion = (idx: number, idsOverride?: string[]) => {
     const s = sets[selectedSetId];
     if (!s) return;
-    const qId = questionIds[idx];
+    const ids = idsOverride ?? questionIds;
+    const qId = ids[idx];
     const q = s.questions[qId];
     if (!q) return;
     const t = DIFF_TIME[q.difficulty ?? "easy"];
@@ -227,6 +263,94 @@ export function KnowledgeScreen() {
     }
   };
 
+  // ── Teacher actions: edit/delete current question ──
+  const openEditCurrent = () => {
+    const qId = questionIds[currentIdx];
+    const q = getQuestion(selectedSetId, qId);
+    if (!q) return;
+    stopTimer();
+    stopSpeech();
+    audio.play("button-click");
+    setQForm({
+      text: q.question,
+      difficulty: q.difficulty,
+      a: q.answers["a"] ?? "",
+      b: q.answers["b"] ?? "",
+      c: q.answers["c"] ?? "",
+      d: q.answers["d"] ?? "",
+      correct: (q.correctKey as "a" | "b" | "c" | "d") ?? "a",
+    });
+    setTeacherModal("edit");
+  };
+
+  const saveCurrentQuestion = async () => {
+    if (!qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim() || savingQ) return;
+    const qId = questionIds[currentIdx];
+    if (!qId) return;
+    setSavingQ(true);
+    try {
+      const updated: Question = {
+        question: qForm.text,
+        difficulty: qForm.difficulty,
+        answers: { a: qForm.a, b: qForm.b, c: qForm.c, d: qForm.d },
+        correctKey: qForm.correct,
+      };
+      await api.setQuestion(selectedSetId, qId, updated);
+      setSets((p) => ({
+        ...p,
+        [selectedSetId]: {
+          ...p[selectedSetId],
+          questions: { ...p[selectedSetId].questions, [qId]: updated },
+        },
+      }));
+      const newShuffled = shuffle(
+        Object.entries(updated.answers).filter(([, v]) => v.trim()),
+      );
+      setShuffledAnswers(newShuffled);
+      setTeacherModal("none");
+    } finally {
+      setSavingQ(false);
+    }
+  };
+
+  const openDeleteCurrent = () => {
+    stopTimer();
+    stopSpeech();
+    audio.play("button-click");
+    setTeacherModal("del");
+  };
+
+  const deleteCurrentQuestion = async () => {
+    if (savingQ) return;
+    const qId = questionIds[currentIdx];
+    if (!qId) return;
+    setSavingQ(true);
+    try {
+      await api.deleteQuestion(selectedSetId, qId);
+      const remainingIds = questionIds.filter((id) => id !== qId);
+      setSets((p) => {
+        const qs = { ...p[selectedSetId].questions };
+        delete qs[qId];
+        return {
+          ...p,
+          [selectedSetId]: { ...p[selectedSetId], questions: qs },
+        };
+      });
+      setTeacherModal("none");
+      if (remainingIds.length === 0) {
+        setQuestionIds([]);
+        setPhase("select");
+        return;
+      }
+      setQuestionIds(remainingIds);
+      const nextIdx = currentIdx >= remainingIds.length ? 0 : currentIdx;
+      setCurrentIdx(nextIdx);
+      nextQuestion(nextIdx, remainingIds);
+    } finally {
+      setSavingQ(false);
+    }
+  };
+
   const currentQ =
     phase === "playing"
       ? getQuestion(selectedSetId, questionIds[currentIdx])
@@ -248,6 +372,7 @@ export function KnowledgeScreen() {
           background: "#FFFBEA",
           display: "flex",
           flexDirection: "column",
+          position: "relative",
         }}
       >
         {/* Header */}
@@ -502,6 +627,44 @@ export function KnowledgeScreen() {
                 </motion.div>
               </div>
 
+              {/* Teacher controls: edit + delete current question */}
+              {isTeacher && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
+                >
+                  <motion.button
+                    onPointerDown={openEditCurrent}
+                    whileTap={{ scale: 0.9 }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "6px 12px", borderRadius: 12,
+                      background: "#FFF3A3", border: "2px solid #F5A800",
+                      boxShadow: "0 2px 0 #C17F00",
+                      fontSize: 13, fontWeight: 700, color: "#3E2000",
+                      fontFamily: "'Baloo 2', cursive",
+                    }}
+                  >
+                    <Pencil size={14} /> Sửa
+                  </motion.button>
+                  <motion.button
+                    onPointerDown={openDeleteCurrent}
+                    whileTap={{ scale: 0.9 }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      padding: "6px 12px", borderRadius: 12,
+                      background: "#FBE9E7", border: "2px solid #FF5722",
+                      boxShadow: "0 2px 0 #BF360C",
+                      fontSize: 13, fontWeight: 700, color: "#FF5722",
+                      fontFamily: "'Baloo 2', cursive",
+                    }}
+                  >
+                    <Trash2 size={14} /> Xoá
+                  </motion.button>
+                </motion.div>
+              )}
+
               {/* Answer buttons */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
                 {shuffledAnswers.map(([key, text], i) => {
@@ -616,10 +779,215 @@ export function KnowledgeScreen() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Teacher edit/delete modal */}
+        <AnimatePresence>
+          {teacherModal !== "none" && (
+            <motion.div
+              key="t-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onPointerDown={() => !savingQ && setTeacherModal("none")}
+              style={{
+                position: "absolute", inset: 0, zIndex: 50,
+                background: "rgba(62,32,0,0.45)",
+                display: "flex", alignItems: "flex-end", justifyContent: "center",
+              }}
+            >
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                onPointerDown={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%", maxWidth: 640, background: "#FFFBEA",
+                  borderRadius: "24px 24px 0 0", border: "3px solid #FFD600",
+                  borderBottom: "none", padding: "20px 20px 44px",
+                  display: "flex", flexDirection: "column", gap: 14,
+                  maxHeight: "95vh", overflowY: "auto",
+                }}
+              >
+                {teacherModal === "edit" && (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: "#3E2000" }}>
+                        Chỉnh sửa câu hỏi
+                      </div>
+                      <motion.button
+                        onPointerDown={() => !savingQ && setTeacherModal("none")}
+                        whileTap={{ scale: 0.9 }}
+                        style={{
+                          width: 32, height: 32, borderRadius: "50%",
+                          background: "#FBE9E7", border: "2px solid #FF5722",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          color: "#FF5722",
+                        }}
+                      >
+                        <X size={16} />
+                      </motion.button>
+                    </div>
+
+                    <FormLabel>Câu hỏi</FormLabel>
+                    <textarea
+                      value={qForm.text}
+                      onChange={(e) => setQForm((f) => ({ ...f, text: e.target.value }))}
+                      placeholder="Nhập nội dung câu hỏi..."
+                      rows={3}
+                      style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
+                    />
+
+                    <FormLabel>Độ khó</FormLabel>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {(Object.entries(DIFF_META) as Array<[keyof typeof DIFF_META, typeof DIFF_META["easy"]]>).map(([k, dm]) => (
+                        <motion.button
+                          key={k}
+                          whileTap={{ scale: 0.95 }}
+                          onPointerDown={() => setQForm((f) => ({ ...f, difficulty: k }))}
+                          style={{
+                            flex: 1, padding: "8px 0", borderRadius: 12,
+                            fontFamily: "'Baloo 2', cursive", fontSize: 13, fontWeight: 700,
+                            background: qForm.difficulty === k ? dm.bg : "#FFF",
+                            border: `2px solid ${qForm.difficulty === k ? dm.color : "#E0E0E0"}`,
+                            color: qForm.difficulty === k ? dm.color : "#7D5A2C",
+                            boxShadow: qForm.difficulty === k ? `0 2px 0 ${dm.color}` : "none",
+                          }}
+                        >
+                          {dm.label}
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    <FormLabel>
+                      Đáp án{" "}
+                      <span style={{ fontSize: 11, fontWeight: 400, color: "#7D5A2C" }}>
+                        (vòng tròn = đáp án đúng)
+                      </span>
+                    </FormLabel>
+                    {ANS_KEYS.map((k, i) => (
+                      <div key={k} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onPointerDown={() => setQForm((f) => ({ ...f, correct: k }))}
+                          style={{
+                            width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+                            background: qForm.correct === k ? "#4CAF50" : "#FFF",
+                            border: `2px solid ${qForm.correct === k ? "#4CAF50" : "#BDBDBD"}`,
+                            color: qForm.correct === k ? "#FFF" : "#BDBDBD",
+                            fontWeight: 800, fontSize: 14,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}
+                        >
+                          {LETTERS[i]}
+                        </motion.button>
+                        <input
+                          value={qForm[k]}
+                          onChange={(e) => setQForm((f) => ({ ...f, [k]: e.target.value }))}
+                          placeholder={`Đáp án ${LETTERS[i]}${k === "c" || k === "d" ? " (tuỳ chọn)" : ""}`}
+                          style={{ ...inputStyle, flex: 1 }}
+                        />
+                      </div>
+                    ))}
+
+                    <motion.button
+                      onPointerDown={saveCurrentQuestion}
+                      whileTap={{ y: 3, boxShadow: "none" }}
+                      disabled={
+                        savingQ || !qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim()
+                      }
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 16, marginTop: 4,
+                        background: savingQ || !qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim()
+                          ? "#E0E0E0" : "#FFD600",
+                        border: `3px solid ${
+                          savingQ || !qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim()
+                            ? "#BDBDBD" : "#F5A800"
+                        }`,
+                        boxShadow: savingQ || !qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim()
+                          ? "none" : "0 4px 0 #C17F00",
+                        fontSize: 16, fontWeight: 800,
+                        color: savingQ || !qForm.text.trim() || !qForm.a.trim() || !qForm.b.trim()
+                          ? "#9E9E9E" : "#3E2000",
+                        fontFamily: "'Baloo 2', cursive",
+                      }}
+                    >
+                      {savingQ ? "Đang lưu..." : "Lưu thay đổi"}
+                    </motion.button>
+                  </>
+                )}
+
+                {teacherModal === "del" && (
+                  <div style={{
+                    display: "flex", flexDirection: "column", gap: 16,
+                    alignItems: "center", padding: "8px 0",
+                  }}>
+                    <AlertTriangle size={48} color="#FF8C00" />
+                    <div style={{
+                      textAlign: "center", fontSize: 15, fontWeight: 700,
+                      color: "#3E2000", lineHeight: 1.5,
+                    }}>
+                      Xoá câu hỏi này?
+                    </div>
+                    <motion.button
+                      onPointerDown={deleteCurrentQuestion}
+                      whileTap={{ y: 3 }}
+                      disabled={savingQ}
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 16,
+                        background: "#FF5722", border: "3px solid #BF360C",
+                        boxShadow: "0 4px 0 #BF360C",
+                        fontSize: 16, fontWeight: 800, color: "#FFF",
+                        fontFamily: "'Baloo 2', cursive",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                      }}
+                    >
+                      <Trash2 size={18} /> {savingQ ? "Đang xoá..." : "Xoá"}
+                    </motion.button>
+                    <motion.button
+                      onPointerDown={() => !savingQ && setTeacherModal("none")}
+                      whileTap={{ y: 3 }}
+                      style={{
+                        width: "100%", padding: "14px 0", borderRadius: 16,
+                        background: "#FFD600", border: "3px solid #F5A800",
+                        boxShadow: "0 4px 0 #C17F00",
+                        fontSize: 16, fontWeight: 800, color: "#3E2000",
+                        fontFamily: "'Baloo 2', cursive",
+                      }}
+                    >
+                      Huỷ
+                    </motion.button>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PageWrapper>
   );
 }
+
+function FormLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 13, fontWeight: 700, color: "#7D5A2C", marginBottom: -6 }}>
+      {children}
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "12px 14px",
+  background: "#FFF",
+  border: "2px solid #FFD600",
+  borderRadius: 12,
+  fontSize: 15,
+  color: "#3E2000",
+  fontFamily: "'Baloo 2', cursive",
+  outline: "none",
+  boxSizing: "border-box",
+};
 
 function GradeChip({
   label,

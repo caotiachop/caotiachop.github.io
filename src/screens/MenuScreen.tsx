@@ -18,7 +18,8 @@ const STUDENT_ITEMS = [
   { label: 'Cáo Thành Tích', sub: 'Bảng xếp hạng', img: '/assets/fox-job/graduade.webp', route: '/leaderboard' },
 ];
 const TEACHER_ITEMS = [
-  { label: 'Quản lý câu hỏi', sub: 'Thêm, sửa, xoá câu hỏi', img: '/assets/fox-job/teacher.webp', route: '/teacher' },
+  { label: 'Cáo Giáo Sư', sub: 'Bộ kiến thức', img: '/assets/fox-job/teacher.webp', route: '/knowledge' },
+  { label: 'Quản lý ứng dụng', sub: 'Câu hỏi, người dùng, menu', img: '/assets/fox-job/graduade.webp', route: '/teacher' },
   { label: 'Cáo Thành Tích', sub: 'Bảng xếp hạng', img: '/assets/fox-job/graduade.webp', route: '/leaderboard' },
 ];
 

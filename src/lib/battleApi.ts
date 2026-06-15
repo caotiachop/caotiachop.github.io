@@ -20,7 +20,7 @@ export const battleApi = {
       code = randCode();
     }
     const now = new Date().toISOString();
-    const hostPlayer: BattlePlayer = { username, grade, score: 0, answerThisQ: null, joinedAt: now };
+    const hostPlayer: BattlePlayer = { username, grade, score: 0, answerThisQ: null, joinedAt: now, eliminated: false };
     const battle: Battle = {
       hostUid, status: 'waiting', questions, timePerQuestion,
       currentQuestionIdx: 0, questionStartedAt: null,
@@ -37,7 +37,7 @@ export const battleApi = {
     const b = snap.data() as Battle;
     if (b.status !== 'waiting') return null;
     if (b.players[uid]) return b;
-    const player: BattlePlayer = { username, grade, score: 0, answerThisQ: null, joinedAt: new Date().toISOString() };
+    const player: BattlePlayer = { username, grade, score: 0, answerThisQ: null, joinedAt: new Date().toISOString(), eliminated: false };
     await updateDoc(ref, { [`players.${uid}`]: player });
     return { ...b, players: { ...b.players, [uid]: player } };
   },
@@ -63,6 +63,7 @@ export const battleApi = {
     playerUids: string[],
     appendQ?: BattleQuestion,
     newTimePerQ?: number,
+    eliminateUids?: string[],
   ): Promise<void> {
     const ref = doc(db, 'battles', code);
     let questions: BattleQuestion[] | undefined;
@@ -78,11 +79,14 @@ export const battleApi = {
     if (questions) up['questions'] = questions;
     if (newTimePerQ !== undefined) up['timePerQuestion'] = newTimePerQ;
     playerUids.forEach(uid => { up[`players.${uid}.answerThisQ`] = null; });
+    eliminateUids?.forEach(uid => { up[`players.${uid}.eliminated`] = true; });
     await updateDoc(ref, up);
   },
 
-  async finishGame(code: string): Promise<void> {
-    await updateDoc(doc(db, 'battles', code), { status: 'finished' });
+  async finishGame(code: string, eliminateUids?: string[]): Promise<void> {
+    const up: Record<string, unknown> = { status: 'finished' };
+    eliminateUids?.forEach(uid => { up[`players.${uid}.eliminated`] = true; });
+    await updateDoc(doc(db, 'battles', code), up);
   },
 
   listen(code: string, cb: (b: Battle | null) => void): () => void {

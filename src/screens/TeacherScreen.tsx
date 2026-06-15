@@ -10,6 +10,7 @@ import {
   GraduationCap,
   AlertTriangle,
   Users,
+  UsersRound,
   LayoutList,
   BookOpen,
   UserPlus,
@@ -24,7 +25,7 @@ import { audio } from "../lib/audio";
 import type { KnowledgeSet, Question, User, MenuItemConfig } from "../types";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type TopTab = "questions" | "teachers" | "menu";
+type TopTab = "questions" | "teachers" | "users" | "menu";
 type QSub = "sets" | "detail";
 type Modal =
   | "none"
@@ -33,7 +34,8 @@ type Modal =
   | "del-set"
   | "del-question"
   | "add-teacher"
-  | "del-teacher";
+  | "del-teacher"
+  | "del-user";
 
 interface SetForm {
   grade: number;
@@ -133,9 +135,9 @@ export function TeacherScreen() {
     }
   }, [currentUser, user, userLoading, navigate]);
 
-  // ── Load users when switching to teachers tab ──
+  // ── Load users when switching to teachers/users tab ──
   useEffect(() => {
-    if (topTab !== "teachers" || Object.keys(allUsers).length > 0) return;
+    if ((topTab !== "teachers" && topTab !== "users") || Object.keys(allUsers).length > 0) return;
     setUsersLoading(true);
     api
       .getAllUsers()
@@ -377,6 +379,27 @@ export function TeacherScreen() {
       setSaving(false);
     }
   };
+  const confirmDelUser = (uid: string) => {
+    setPDI(uid);
+    setModal("del-user");
+  };
+  const deleteUserAccount = async () => {
+    if (saving) return;
+    const target = allUsers[pendingDeleteId];
+    if (!target) return;
+    setSaving(true);
+    try {
+      await api.deleteUser(pendingDeleteId, target.username);
+      setAllUsers((p) => {
+        const next = { ...p };
+        delete next[pendingDeleteId];
+        return next;
+      });
+      setModal("none");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // ──────────────────────────────────────────────────────────
   // MENU CONFIG
@@ -399,11 +422,13 @@ export function TeacherScreen() {
   const headerTitle =
     topTab === "teachers"
       ? "Giáo viên"
-      : topTab === "menu"
-        ? "Menu học sinh"
-        : qSub === "detail"
-          ? (selectedSet?.topic ?? "Câu hỏi")
-          : "Quản lý câu hỏi";
+      : topTab === "users"
+        ? "Người dùng"
+        : topTab === "menu"
+          ? "Menu học sinh"
+          : qSub === "detail"
+            ? (selectedSet?.topic ?? "Câu hỏi")
+            : "Quản lý câu hỏi";
 
   const handleBack = () => {
     audio.play("button-back");
@@ -507,6 +532,11 @@ export function TeacherScreen() {
                   id: "teachers",
                   icon: <Users size={15} />,
                   label: "Giáo viên",
+                },
+                {
+                  id: "users",
+                  icon: <UsersRound size={15} />,
+                  label: "Người dùng",
                 },
                 {
                   id: "menu",
@@ -921,6 +951,111 @@ export function TeacherScreen() {
                       )}
                     </motion.div>
                   ))
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── USERS TAB ── */}
+          {topTab === "users" && (
+            <motion.div
+              key="users"
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+              style={{ flex: 1, overflowY: "auto" }}
+            >
+              <div
+                style={{
+                  padding: "12px 16px 100px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                {usersLoading ? (
+                  <LoadMsg msg="Đang tải..." />
+                ) : Object.keys(allUsers).length === 0 ? (
+                  <LoadMsg msg="Chưa có người dùng nào." />
+                ) : (
+                  Object.entries(allUsers)
+                    .sort((a, b) => a[1].username.localeCompare(b[1].username))
+                    .map(([uid, u], i) => (
+                      <motion.div
+                        key={uid}
+                        initial={{ opacity: 0, x: -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          background:
+                            u.username === currentUser ? "#FFF3A3" : "#FFF",
+                          border: `2px solid ${u.username === currentUser ? "#FFD600" : "#E0E0E0"}`,
+                          borderRadius: 14,
+                          padding: "12px 14px",
+                          boxShadow: "0 2px 0 #F5A800",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "50%",
+                            background:
+                              u.role === "teacher" ? "#FFD600" : "#E8F5E9",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: 18,
+                            fontWeight: 800,
+                            color:
+                              u.role === "teacher" ? "#3E2000" : "#2E7D32",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {u.username[0]?.toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontSize: 15,
+                              fontWeight: 800,
+                              color: "#3E2000",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {u.username}
+                            {u.username === currentUser && (
+                              <span
+                                style={{ fontSize: 12, color: "#F5A800" }}
+                              >
+                                {" "}
+                                (Bạn)
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#7D5A2C" }}>
+                            Lớp {u.grade} •{" "}
+                            {u.role === "teacher" ? "Giáo viên" : "Học sinh"}
+                          </div>
+                        </div>
+                        {u.username !== currentUser && (
+                          <IconBtn
+                            icon={Trash2}
+                            color="#FF5722"
+                            bg="#FBE9E7"
+                            onClick={() => {
+                              audio.play("button-click");
+                              confirmDelUser(uid);
+                            }}
+                          />
+                        )}
+                      </motion.div>
+                    ))
                 )}
               </div>
             </motion.div>
@@ -1383,6 +1518,16 @@ export function TeacherScreen() {
                   <ConfirmDelete
                     message={`Xoá quyền giáo viên của "${allUsers[pendingDeleteId]?.username ?? pendingDeleteId}"? Họ sẽ trở thành học sinh.`}
                     onConfirm={demoteTeacher}
+                    onCancel={closeModal}
+                    saving={saving}
+                  />
+                )}
+
+                {/* Confirm delete user account */}
+                {modal === "del-user" && (
+                  <ConfirmDelete
+                    message={`Xoá hoàn toàn tài khoản "${allUsers[pendingDeleteId]?.username ?? pendingDeleteId}"? Toàn bộ điểm và tiến độ sẽ mất.`}
+                    onConfirm={deleteUserAccount}
                     onCancel={closeModal}
                     saving={saving}
                   />

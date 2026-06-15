@@ -20,19 +20,36 @@ export const api = {
     return result;
   },
 
-  // /usernames/{username} là collection public (không cần auth) dùng để lookup uid
+  // /usernames/{username} là collection public (không cần auth) dùng để lookup uid + authEmail
   async findUidByUsername(username: string): Promise<string | null> {
     const snap = await getDoc(doc(db, 'usernames', username));
     if (!snap.exists()) return null;
     return (snap.data() as { uid: string }).uid;
   },
 
-  async registerUsername(username: string, uid: string): Promise<void> {
-    await setDoc(doc(db, 'usernames', username), { uid });
+  async findUsernameMapping(username: string): Promise<{ uid: string; authEmail?: string } | null> {
+    const snap = await getDoc(doc(db, 'usernames', username));
+    if (!snap.exists()) return null;
+    return snap.data() as { uid: string; authEmail?: string };
+  },
+
+  async registerUsername(username: string, uid: string, authEmail?: string): Promise<void> {
+    const data: Record<string, unknown> = { uid };
+    if (authEmail) data.authEmail = authEmail;
+    await setDoc(doc(db, 'usernames', username), data);
   },
 
   async updateUser(uid: string, data: Partial<User>): Promise<void> {
     await updateDoc(doc(db, 'users', uid), data as Record<string, unknown>);
+  },
+
+  async deleteUser(uid: string, username: string): Promise<void> {
+    await Promise.all([
+      deleteDoc(doc(db, 'users', uid)),
+      deleteDoc(doc(db, 'scores', uid)),
+      deleteDoc(doc(db, 'userProgress', uid)),
+      deleteDoc(doc(db, 'usernames', username)),
+    ]);
   },
 
   // --- Scores ---
